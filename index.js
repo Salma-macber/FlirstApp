@@ -27,24 +27,51 @@ app.set('views', __dirname + '/views') // for rendering the views
 
 // Serve static files from the root directory
 app.use(express.static(__dirname))
-
+// Serve static files from the node_modules/bootstrap/dist directory
+app.use(
+    express.static(path.join(__dirname, "node_modules/bootstrap/dist/"))
+);
+// Serve static files from the node_modules/bootstrap-icons/font directory
+app.use(
+    express.static(path.join(__dirname, "node_modules/bootstrap-icons/font"))
+);
+//
 app.get('/', (req, res) => {
-    MyData.find()
-        .then((result) => {
-            console.log(result)
-            res.render('home', { myTitle: 'Home Page', data: result }) // Render the home page
-        })
-        .catch((err) => {
-            console.log('Error fetching data', err)
-            res.status(500).send('Error fetching data from database')
-        })
+    res.render('home', { myTitle: 'Home Page', }) // Render the home page
+
+    // MyData.find()
+    //     .then((result) => {
+    //         console.log(result)
+    //         res.render('home', { myTitle: 'Home Page', data: result }) // Render the home page
+    //     })
+    //     .catch((err) => {
+    //         console.log('Error fetching data', err)
+    //         res.status(500).send('Error fetching data from database')
+    //     })
     // res.sendFile(__dirname + '/views/home.html')
 
 })
 
 app.get('/success', (req, res) => {
-    res.sendFile(__dirname + '/views/success.html')
+    res.sendFile(__dirname + '/views/success.ejs')
 })
+app.get('/user/add', (req, res) => {
+    res.render('user/add')
+})
+app.get('/user/edit', (req, res) => {
+    res.render('user/edit', { myTitle: 'Edit User' })
+})
+app.get('/user/view', (req, res) => {
+    res.render('user/view', { myTitle: 'View User' })
+})
+app.get('/user/delete', (req, res) => {
+    res.render('user/delete', { myTitle: 'Delete User' })
+})
+app.get('/user/search', (req, res) => {
+    res.render('user/search', { myTitle: 'Search User' })
+})
+
+
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}, open => http://localhost:${port} inside your browser to see the result`)
