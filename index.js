@@ -14,7 +14,7 @@ app.listen(port, () => {
     console.log(`App listening on port ${port}, open => http://localhost:${port} inside your browser to see the result`)
 })
 // NOTE: and add all-data inside /?
-mongoose.connect('mongodb+srv://salma_db_user:$SalmaAMKBEssam$@cluster0.xl3c3oh.mongodb.net/all-data?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb+srv://salma_db_user:85wtDax!PL*jvrZ@cluster0.xl3c3oh.mongodb.net/all-data?retryWrites=true&w=majority&appName=Cluster0', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => {
         console.log('Connected to MongoDB')
     })
