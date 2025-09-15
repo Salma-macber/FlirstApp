@@ -16,7 +16,8 @@
         "bootstrap": "^5.3.8",
         "ejs": "^3.1.10",
         "express": "^5.1.0",
-        "mongoose": "^8.18.1"
+        "mongoose": "^8.18.1",
+        "svg": "^0.1.0"
     },
     "devDependencies": {
         "connect-livereload": "^0.6.1",

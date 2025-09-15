@@ -3,7 +3,6 @@ const app = express()
 const port = 3000
 const mongoose = require('mongoose')
 const MyData = require('./models/dataSchema')
-
 // Start auto refresh the server
 // NOTE: this is the livereload server
 // NOTE: this is the connectLivereload server
