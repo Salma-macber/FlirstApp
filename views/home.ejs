@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <title>Home Page</title> -->
+    <title>
+        <%= myTitle %>
+    </title>
+    <link rel="stylesheet" href="/public/style.css">
+</head>
+
+<body class="body">
+    <h1>Hello World From <%= myTitle %> !!!!!
+    </h1>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a href="/services">Services</a>
+    <br>
+    <br>
+    <br>
+    <form action="/send-to-db" method="post">
+        <input type="text" placeholder="Enter your name" name="userName">
+        <br>
+        <input type="password" placeholder="Enter your password" name="userPassword">
+        <br>
+        <br>
+        <button class="button">Send To DB</button>
+        <br>
+    </form>
+
+    <br> <br> <br> <br> <br>
+    <h1>Data from database</h1>
+    <ul>
+        <% data.forEach(item=> { %>
+            <li>
+                <%= item.userName %>
+            </li>
+            <% }) %>
+    </ul>
+</body>
+
+</html>
