@@ -1,0 +1,99 @@
+<div class="dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
+    <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button"
+        aria-expanded="false" data-bs-toggle="dropdown" aria-label="Toggle theme (auto)">
+        <svg class="bi my-1 theme-icon-active" width="1em" height="1em">
+            <use href="#circle-half"></use>
+        </svg>
+        <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
+        <li>
+            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light"
+                aria-pressed="false">
+                <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+                    <use href="#sun-fill"></use>
+                </svg>
+                Light
+                <svg class="bi ms-auto check-icon" width="1em" height="1em">
+                    <use href="#check2"></use>
+                </svg>
+            </button>
+        </li>
+        <li>
+            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark"
+                aria-pressed="false">
+                <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+                    <use href="#moon-stars-fill"></use>
+                </svg>
+                Dark
+                <svg class="bi ms-auto check-icon" width="1em" height="1em">
+                    <use href="#check2"></use>
+                </svg>
+            </button>
+        </li>
+        <li>
+            <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto"
+                aria-pressed="true">
+                <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em">
+                    <use href="#circle-half"></use>
+                </svg>
+                Auto
+                <svg class="bi ms-auto check-icon" width="1em" height="1em">
+                    <use href="#check2"></use>
+                </svg>
+            </button>
+        </li>
+    </ul>
+</div>
+
+<script>
+    // Apply theme immediately to prevent flash
+    (function () {
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', theme);
+    })();
+
+    // Bootstrap theme toggle functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get current theme from localStorage or default to 'light'
+        let currentTheme = localStorage.getItem('theme') || 'light';
+
+        // Set the initial theme
+        document.documentElement.setAttribute('data-bs-theme', currentTheme);
+        updateActiveButton(currentTheme);
+
+        // Add event listeners to theme buttons
+        document.querySelectorAll('[data-bs-theme-value]').forEach(button => {
+            button.addEventListener('click', function () {
+                const theme = this.getAttribute('data-bs-theme-value');
+                currentTheme = theme;
+                localStorage.setItem('theme', theme);
+                document.documentElement.setAttribute('data-bs-theme', theme);
+                updateActiveButton(theme);
+            });
+        });
+
+        function updateActiveButton(theme) {
+            // Remove active class from all buttons
+            document.querySelectorAll('[data-bs-theme-value]').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+                const checkIcon = btn.querySelector('.check-icon');
+                if (checkIcon) {
+                    checkIcon.style.display = 'none';
+                }
+            });
+
+            // Add active class to current theme button
+            const activeButton = document.querySelector(`[data-bs-theme-value="${theme}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+                activeButton.setAttribute('aria-pressed', 'true');
+                const checkIcon = activeButton.querySelector('.check-icon');
+                if (checkIcon) {
+                    checkIcon.style.display = 'block';
+                }
+            }
+        }
+    });
+</script>
