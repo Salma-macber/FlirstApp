@@ -1,16 +1,25 @@
 const express = require('express')
+// const morgan = require('morgan') // for logging the requests middleware
+const dotenv = require('dotenv') // for loading the environment variables
+dotenv.config({ path: './config.env' }) // for loading the environment variables
+// import express from 'express'
 const app = express()
-const port = 3000
-const mongoose = require('mongoose')
-const MyData = require('./models/dataSchema')
+const port = process.env.PORT || 3000
+app.use(express.json()) // for parsing application/json  middleware
+const mongoose = require('mongoose') // for connecting to the database
+const methodOverride = require('method-override') // for handling DELETE requests via POST
 // Start auto refresh the server
 // NOTE: this is the livereload server
 // NOTE: this is the connectLivereload server
-const path = require('path')
-const livereload = require('livereload')
+const path = require('path') // for serving static files from the root directory
+const livereload = require('livereload') // for livereload server
 const liveReloadServer = livereload.createServer()
 liveReloadServer.watch(path.join(__dirname, 'public'))
-const connectLivereload = require('connect-livereload')
+
+const connectLivereload = require('connect-livereload') // for connectLivereload server
+
+
+const allRoutes = require('./routes/allRoutes') // for the routes
 app.use(connectLivereload())
 liveReloadServer.server.once('connection', () => {
     setTimeout(() => {
@@ -19,59 +28,32 @@ liveReloadServer.server.once('connection', () => {
 })
 // End auto refresh the server
 // Middleware to parse JSON and URL-encoded data
-app.use(express.json()) // for parsing application/json
-app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
-app.set('view engine', 'ejs') // for rendering the views
-app.set('views', __dirname + '/views') // for rendering the views
-
+app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded middleware 
+app.use(express.static('public')) // for serving static files from the public directory
+app.use(methodOverride('_method')) // for handling DELETE requests via POST middleware
+app.set('view engine', 'ejs') // for rendering the views by use ejs template engine
+app.set('views', __dirname + '/views') //default views directory
+// app.use(morgan('combined')) // for logging the requests middleware
 // Serve static files from the root directory
-app.use(express.static(__dirname))
+app.use(express.static(__dirname)) // for serving static files from the root directory middleware
 // Serve static files from the node_modules/bootstrap/dist directory
 app.use(
-    express.static(path.join(__dirname, "node_modules/bootstrap/dist/"))
+    express.static(path.join(__dirname, "node_modules/bootstrap/dist/")) // for serving static files from the node_modules/bootstrap/dist directory
 );
 // Serve static files from the node_modules/bootstrap-icons/font directory
 app.use(
-    express.static(path.join(__dirname, "node_modules/bootstrap-icons/font"))
+    express.static(path.join(__dirname, "node_modules/bootstrap-icons/font")) // for serving static files from the node_modules/bootstrap-icons/font directory
 );
-//
-app.get('/', (req, res) => {
-    res.render('home', { myTitle: 'Home Page', }) // Render the home page
 
-    // MyData.find()
-    //     .then((result) => {
-    //         console.log(result)
-    //         res.render('home', { myTitle: 'Home Page', data: result }) // Render the home page
-    //     })
-    //     .catch((err) => {
-    //         console.log('Error fetching data', err)
-    //         res.status(500).send('Error fetching data from database')
-    //     })
-    // res.sendFile(__dirname + '/views/home.html')
+// Routes
+app.use(allRoutes)
 
-})
+// Error handling middleware (must come after routes)
+const { notFound, errorHandler } = require('./middlewares/errorsMeddleWare')
+app.use(notFound)
+app.use(errorHandler)
 
-app.get('/success', (req, res) => {
-    res.sendFile(__dirname + '/views/success.ejs')
-})
-app.get('/user/add', (req, res) => {
-    res.render('user/add')
-})
-app.get('/user/edit', (req, res) => {
-    res.render('user/edit', { myTitle: 'Edit User' })
-})
-app.get('/user/view', (req, res) => {
-    res.render('user/view', { myTitle: 'View User' })
-})
-app.get('/user/delete', (req, res) => {
-    res.render('user/delete', { myTitle: 'Delete User' })
-})
-app.get('/user/search', (req, res) => {
-    res.render('user/search', { myTitle: 'Search User' })
-})
-
-
-
+// تشغيل السيرفر
 app.listen(port, () => {
     console.log(`App listening on port ${port}, open => http://localhost:${port} inside your browser to see the result`)
 })
@@ -84,24 +66,7 @@ mongoose.connect('mongodb+srv://salma_db_user:85wtDax!PL*jvrZ@cluster0.xl3c3oh.m
         console.log('Error connecting to MongoDB', err)
     })
 
-app.post('/send-to-db', (req, res) => {
-    // NOTE: this is the data that is sent to the database 
-    console.log(`Data sent to MongoDB ${req.body}`)
-    const { userName, userPassword } = req.body
-    const newData = new MyData({ userName, userPassword })
-
-    newData.save()
-        .then(() => {
-            console.log('Data saved successfully')
-            res.redirect('/success') // Redirect back to home page after successful save
-        })
-        .catch((err) => {
-            console.error('Error saving data:', err)
-            res.status(500).send('Error saving data to database')
-        })
-})
-
-
 //mongodb+srv://salma_db_user:$SalmaAMKBEssam$@cluster0.xl3c3oh.mongodb.net/
 //mongodb+srv://salma_db_user:$SalmaAMKBEssam$@cluster0.xl3c3oh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 //mongodb+srv://salma_db_user:<db_password>@cluster0.xl3c3oh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+// app.use('/user', allRoutes) // if you want to use the routes in the user initial file

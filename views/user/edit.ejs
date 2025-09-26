@@ -2,9 +2,9 @@
 <html lang="en" data-bs-theme="auto">
 
 <head>
-  <script src="../js/color-modes.js"></script>
-  <link rel="stylesheet" href="../bootstrap-icons-1.10.5/font/bootstrap-icons.min.css" />
-  <link rel="shortcut icon" href="../img/ali.png" type="image/x-icon">
+  <script src="../../public/js/color-modes.js"></script>
+  <link rel="stylesheet" href="../../public/css/bootstrap.min.css" />
+  <link rel="shortcut icon" href="../../public/img/ali.png" type="image/x-icon">
 
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -68,63 +68,116 @@
           <nav class="px-2 mt-4 d-flex flex-wrap justify-content-between" aria-label="breadcrumb">
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="/">Home</a></li>
-              <li class="breadcrumb-item active" aria-current="page">Ali Hassan</li>
+              <li class="breadcrumb-item active" aria-current="page">
+                <%= data.userFirstName %>
+                  <%= data.userLastName %>
+              </li>
             </ol>
 
 
-            <p class="me-md-5"> <span class="fw-medium fs-6">Id :</span> 6487021520bcf1af6319484c</p>
+            <p class="me-md-5"> <span class="fw-medium fs-6">Id :</span>
+              <%= data._id %>
+            </p>
           </nav>
 
 
-
-
-
-
-
-
-          <form class="mx-0 row gx-3 gy-4 mt-2">
+          <form class="mx-0 row gx-3 gy-4 mt-2" action="/user/edit/<%=data._id%>?_method=PUT" method="post">
             <div class="col-md-6">
               <label for="inputfirstName4" class="form-label">First Name:</label>
-              <input placeholder="Ali..." type="text" class="form-control" id="inputfirstName4" />
+              <input value="  <%= data.userFirstName %>" type="text" class="form-control" id="inputfirstName4"
+                name="userFirstName" />
             </div>
             <div class="col-md-6">
               <label for="inputlastName4" class="form-label">Last Name:</label>
-              <input placeholder="Hassan..." type="text" class="form-control" id="inputlastName4" />
+              <input value="<%= data.userLastName %>" type="text" class="form-control" id="inputlastName4"
+                name="userLastName" />
             </div>
-
             <div class="col-md-6">
               <label for="inputemail4" class="form-label">Email:</label>
-              <input placeholder="ali@gmail.com" type="email" class="form-control" id="inputemail4" />
+              <input value="<%= data.userEmail %>" type="email" class="form-control" id="inputemail4"
+                name="userEmail" />
             </div>
             <div class="col-md-6">
               <label for="inputtele4" class="form-label">Telephone:</label>
-              <input placeholder="011987899" type="number" class="form-control" id="inputtele4" />
+              <input value="<%= data.userPhone %>" type="number" class="form-control" id="inputtele4"
+                name="userPhone" />
             </div>
-
             <div>
               <div class="col-md-6">
                 <label for="inputage4" class="form-label">Age:</label>
-                <input placeholder="Your Age: ..." type="number" class="form-control" id="inputage4" />
+                <input value="<%= data.userAge %>" type="number" class="form-control" id="inputage4" name="userAge" />
               </div>
             </div>
-
             <div>
               <div class="col-md-6">
                 <label for="inputCountry" class="form-label">Country:</label>
-                <select id="inputCountry" class="form-select">
-                  <option selected hidden disabled>Choose here ...</option>
+                <select id="inputCountry" class="form-select" name="userCountry">
+                  <option selected hidden disabled>
+                    <%= data.userCountry %>
+                  </option>
 
-                  <option>Morocco</option>
-                  <option>Egypt</option>
+                  <% const countryList=[ "Afghanistan" , "Albania" , "Algeria" , "American Samoa" , "Andorra" , "Angola"
+                    , "Anguilla" , "Antarctica" , "Antigua and Barbuda" , "Argentina" , "Armenia" , "Aruba"
+                    , "Australia" , "Austria" , "Azerbaijan" , "Bahamas (the)" , "Bahrain" , "Bangladesh" , "Barbados"
+                    , "Belarus" , "Belgium" , "Belize" , "Benin" , "Bermuda" , "Bhutan"
+                    , "Bolivia (Plurinational State of)" , "Bonaire, Sint Eustatius and Saba" , "Bosnia and Herzegovina"
+                    , "Botswana" , "Bouvet Island" , "Brazil" , "British Indian Ocean Territory (the)"
+                    , "Brunei Darussalam" , "Bulgaria" , "Burkina Faso" , "Burundi" , "Cabo Verde" , "Cambodia"
+                    , "Cameroon" , "Canada" , "Cayman Islands (the)" , "Central African Republic (the)" , "Chad"
+                    , "Chile" , "China" , "Christmas Island" , "Cocos (Keeling) Islands (the)" , "Colombia"
+                    , "Comoros (the)" , "Congo (the Democratic Republic of the)" , "Congo (the)" , "Cook Islands (the)"
+                    , "Costa Rica" , "Croatia" , "Cuba" , "Curaçao" , "Cyprus" , "Czechia" , "Côte d'Ivoire" , "Denmark"
+                    , "Djibouti" , "Dominica" , "Dominican Republic (the)" , "Ecuador" , "Egypt" , "El Salvador"
+                    , "Equatorial Guinea" , "Eritrea" , "Estonia" , "Eswatini" , "Ethiopia"
+                    , "Falkland Islands (the) [Malvinas]" , "Faroe Islands (the)" , "Fiji" , "Finland" , "France"
+                    , "French Guiana" , "French Polynesia" , "French Southern Territories (the)" , "Gabon"
+                    , "Gambia (the)" , "Georgia" , "Germany" , "Ghana" , "Gibraltar" , "Greece" , "Greenland"
+                    , "Grenada" , "Guadeloupe" , "Guam" , "Guatemala" , "Guernsey" , "Guinea" , "Guinea-Bissau"
+                    , "Guyana" , "Haiti" , "Heard Island and McDonald Islands" , "Holy See (the)" , "Honduras"
+                    , "Hong Kong" , "Hungary" , "Iceland" , "India" , "Indonesia" , "Iran (Islamic Republic of)"
+                    , "Iraq" , "Ireland" , "Isle of Man" , "Israel" , "Italy" , "Jamaica" , "Japan" , "Jersey"
+                    , "Jordan" , "Kazakhstan" , "Kenya" , "Kiribati" , "Korea (the Democratic People's Republic of)"
+                    , "Korea (the Republic of)" , "Kuwait" , "Kyrgyzstan" , "Lao People's Democratic Republic (the)"
+                    , "Latvia" , "Lebanon" , "Lesotho" , "Liberia" , "Libya" , "Liechtenstein" , "Lithuania"
+                    , "Luxembourg" , "Macao" , "Madagascar" , "Malawi" , "Malaysia" , "Maldives" , "Mali" , "Malta"
+                    , "Marshall Islands (the)" , "Martinique" , "Mauritania" , "Mauritius" , "Mayotte" , "Mexico"
+                    , "Micronesia (Federated States of)" , "Moldova (the Republic of)" , "Monaco" , "Mongolia"
+                    , "Montenegro" , "Montserrat" , "Morocco" , "Mozambique" , "Myanmar" , "Namibia" , "Nauru" , "Nepal"
+                    , "Netherlands (the)" , "New Caledonia" , "New Zealand" , "Nicaragua" , "Niger (the)" , "Nigeria"
+                    , "Niue" , "Norfolk Island" , "Northern Mariana Islands (the)" , "Norway" , "Oman" , "Pakistan"
+                    , "Palau" , "Palestine, State of" , "Panama" , "Papua New Guinea" , "Paraguay" , "Peru"
+                    , "Philippines (the)" , "Pitcairn" , "Poland" , "Portugal" , "Puerto Rico" , "Qatar"
+                    , "Republic of North Macedonia" , "Romania" , "Russian Federation (the)" , "Rwanda" , "Réunion"
+                    , "Saint Barthélemy" , "Saint Helena, Ascension and Tristan da Cunha" , "Saint Kitts and Nevis"
+                    , "Saint Lucia" , "Saint Martin (French part)" , "Saint Pierre and Miquelon"
+                    , "Saint Vincent and the Grenadines" , "Samoa" , "San Marino" , "Sao Tome and Principe"
+                    , "Saudi Arabia" , "Senegal" , "Serbia" , "Seychelles" , "Sierra Leone" , "Singapore"
+                    , "Sint Maarten (Dutch part)" , "Slovakia" , "Slovenia" , "Solomon Islands" , "Somalia"
+                    , "South Africa" , "South Georgia and the South Sandwich Islands" , "South Sudan" , "Spain"
+                    , "Sri Lanka" , "Sudan (the)" , "Suriname" , "Svalbard and Jan Mayen" , "Sweden" , "Switzerland"
+                    , "Syrian Arab Republic" , "Taiwan" , "Tajikistan" , "Tanzania, United Republic of" , "Thailand"
+                    , "Timor-Leste" , "Togo" , "Tokelau" , "Tonga" , "Trinidad and Tobago" , "Tunisia" , "Turkey"
+                    , "Turkmenistan" , "Turks and Caicos Islands (the)" , "Tuvalu" , "Uganda" , "Ukraine"
+                    , "United Arab Emirates (the)" , "United Kingdom of Great Britain and Northern Ireland (the)"
+                    , "United States Minor Outlying Islands (the)" , "United States of America (the)" , "Uruguay"
+                    , "Uzbekistan" , "Vanuatu" , "Venezuela (Bolivarian Republic of)" , "Viet Nam"
+                    , "Virgin Islands (British)" , "Virgin Islands (U.S.)" , "Wallis and Futuna" , "Western Sahara"
+                    , "Yemen" , "Zambia" , "Zimbabwe" , "Åland Islands" ] %>
+                    <% countryList.forEach((item, index)=> { %>
+                      <option value="<%=item%>">
+                        <%=item%>
+                      </option>
+                      <% }) %>
                 </select>
               </div>
             </div>
-
             <div>
               <div class="col-md-6">
                 <label for="inputGender" class="form-label">Gender:</label>
-                <select id="inputGender" class="form-select">
-                  <option selected hidden disabled>Choose here ...</option>
+                <select id="inputGender" class="form-select" name="userGender">
+                  <option selected hidden disabled>
+                    <%= data.userGender %>
+                  </option>
                   <option>Male</option>
                   <option>Female</option>
                 </select>
@@ -157,18 +210,20 @@
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                 Close
               </button>
-              <button type="button" class="btn btn-danger">
-                Delete
-              </button>
+              <form action="/user/delete/<%=data._id%>?_method=DELETE" method="post">
+                <button type="submit" class="btn btn-danger" data-bs-dismiss="modal">
+                  Delete
+                </button>
+              </form>
             </div>
           </div>
         </div>
       </div>
     </main>
-    <script src="../js/bootstrap.bundle.min.js"></script>
+    <script src="../../public/js/bootstrap.bundle.min.js"></script>
 
-    <script src="../js/sidebars.js"></script>
-    <script src="../js/main.js"></script>
+    <script src="../../public/js/sidebars.js"></script>
+    <script src="../../public/js/main.js"></script>
 </body>
 
 </html>
