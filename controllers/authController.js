@@ -40,7 +40,7 @@ const signup = async (req, res) => {
         user: newUser,
         accessToken: accessToken
     });
-    res.redirect('/success')
+    // res.redirect('/success')
 }
 
 const login = async (req, res) => {
@@ -98,7 +98,71 @@ const logout = async (req, res) => {
     // res.redirect('/login')
 }
 
-module.exports = { signup, login, refresh, logout }
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email });
+    if (!user) return res.status(400).json({ message: "المستخدم غير موجود ❌" });
+    res.json({ message: "تم إرسال كلمة السر إلى البريد الإلكتروني ✅", password });
+}
+
+const resetPassword = async (req, res) => {
+    const { email, password, otp } = req.body;
+    const user = await User.findOne({ email: email });
+    if (!user) return res.status(400).json({ message: "المستخدم غير موجود ❌" });
+    if (otp !== "1234") return res.status(400).json({ message: "الرمز غير صحيح ❌" });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+    res.json({ message: "تم تعديل كلمة السر ✅" });
+}
+
+// Change password
+const changePassword = async (req, res) => {
+
+    try {
+        const { oldPassword, newPassword, userId } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: "All fields are required ❌" });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({ message: "Password must be at least 8 characters ❌" });
+        }
+
+        // Find user
+        const user = await User.findById({ _id: userId });
+        if (!user) return res.status(404).json({ message: "User not found ❌" });
+
+        // Check old password
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) return res.status(400).json({ message: "Old password is incorrect ❌" });
+
+        // Prevent same password reuse
+        const isSame = await bcrypt.compare(newPassword, user.password);
+        if (isSame) return res.status(400).json({ message: "New password cannot be the same as old password ❌" });
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Save
+        user.password = hashedPassword;
+        await user.save();
+
+        // (Optional) Generate a new token
+        const token = jwt.sign({ id: user._id }, process.env.AccessTokenSecret, { expiresIn: "1h" });
+
+        res.status(200).json({
+            message: "Password changed successfully ✅",
+            token, // send new token if needed
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error ❌" });
+    }
+}
+
+module.exports = { signup, login, refresh, logout, forgotPassword, resetPassword, changePassword }
 
 
 

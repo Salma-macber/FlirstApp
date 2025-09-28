@@ -9,7 +9,11 @@ const getAllData = (req, res) => {
     userSchema.find().select('-password').lean()
         .then((result) => {
             console.log(result)
-            res.render('home', { myTitle: 'Home Page', data: result, moment: moment }) // Render the home page
+            res.status(200).json({
+                message: "Data fetched successfully",
+                data: result
+            })
+            // res.render('home', { myTitle: 'Home Page', data: result, moment: moment }) // Render the home page
         })
         .catch((err) => {
             console.log('Error fetching data', err)
