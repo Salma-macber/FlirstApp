@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js",
+        "start": "tsc --watch",
         "watch": "nodemon index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
@@ -21,7 +21,6 @@
         "ejs": "^3.1.10",
         "express": "^5.1.0",
         "jsonwebtoken": "^9.0.2",
-        "logger": "^0.0.1",
         "method-override": "^3.0.0",
         "moment": "^2.30.1",
         "mongoose": "^8.18.1",
@@ -30,8 +29,17 @@
         "svg": "^0.1.0"
     },
     "devDependencies": {
+        "@types/connect-livereload": "^0.6.3",
+        "@types/cookie-parser": "^1.4.9",
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.3",
+        "@types/livereload": "^0.9.5",
+        "@types/method-override": "^3.0.0",
+        "@types/morgan": "^1.9.10",
+        "@types/node": "^24.5.2",
         "connect-livereload": "^0.6.1",
         "livereload": "^0.10.3",
-        "nodemon": "^3.0.2"
+        "nodemon": "^3.0.2",
+        "typescript": "^5.9.2"
     }
 }
