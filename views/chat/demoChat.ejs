@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Socket.IO Chat </title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+
+<body>
+    <h2>💬 Chat Example</h2>
+    <input id="message" type="text" placeholder="اكتب رسالة...">
+    <button onclick="sendMessage()">Save to Me</button>
+    <button onclick="sendMessageToRoom()">Sent to Room</button>
+    <button onclick="sendMessageToRoomExceptMe()">Sent to Room except Me </button>
+    <ul id="messages"></ul>
+    <button onclick="joinRoom()">Join Room</button>
+    <button onclick="leaveRoom()">Leave Room</button>
+    <script>
+        const socket = io();
+        // receive message from the server
+        socket.on('chatMessage', (msg) => {
+            const li = document.createElement('li');
+            li.textContent = msg;
+            document.getElementById('messages').appendChild(li);
+        });
+        socket.on('newMsg', (msg) => {
+            const li = document.createElement('li');
+            li.textContent = msg;
+            document.getElementById('messages').appendChild(li);
+        });
+
+        function sendMessage() {
+            const input = document.getElementById('message');
+            const msg = input.value;
+            socket.emit('chatMessage', msg);
+            input.value = '';
+        } function sendMessageToRoom() {
+            const input = document.getElementById('message');
+            const msg = input.value;
+            socket.emit('newChatMessageToRoom', 'myRoom', msg);
+            input.value = '';
+        }
+        function joinRoom() {
+            socket.emit('joinRoom', 'myRoom');
+        }
+        function leaveRoom() {
+            socket.emit('leaveRoom', 'myRoom');
+        }
+        function sendMessageToRoomExceptMe() {
+            const input = document.getElementById('message');
+            const msg = input.value;
+            socket.emit('sendMessageToRoomExceptSender', 'myRoom', msg);
+            input.value = '';
+        }
+    </script>
+</body>
+
+</html>

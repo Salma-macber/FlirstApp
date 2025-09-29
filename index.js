@@ -8,6 +8,66 @@ const connectDB = require('./controllers/dbController') // for connecting to the
 // import express from 'express'
 const app = express()
 const port = process.env.PORT || 3000
+
+const http = require('http');
+const { Server } = require('socket.io');
+const server = http.createServer(app);
+// setup Socket.IO
+const io = new Server(server, {
+    cors: {
+        origin: process.env.FRONTEND_URL || process.env.BACKEND_URL, // you can change it to http://localhost:3000 for example
+        methods: ['GET', 'POST'],
+    },
+});
+
+// when a new client connects to the server
+io.on('connection', (socket) => {
+    console.log(`🔌 User connected: ${socket.id}`);
+    //socket is connection to the server with the specific client
+    // receive message from the client
+    socket.on('chatMessage', (msg) => {
+        console.log(`💬 message from ${socket.id}: ${msg}`);
+        socket.emit('chatMessage', msg);
+
+        //io.emit because it is sending the message to all the clients (including the sender)
+        // io.emit('chatMessage', msg);
+        // io.to(socket.id).emit('chatMessage', msg);
+        // but we want to send the message to all the clients except the sender
+        // so we use socket.broadcast.emit
+        // socket.broadcast.emit('chatMessage', msg);
+    });
+    socket.on('newChatMessageToRoom', (room, msg) => {
+        console.log(`💬 message from ${socket.id}: ${msg}`);
+        io.to(`${room}`).emit('newMsg', msg);
+
+    });
+    socket.on('sendMessageToRoomExceptSender', (room, msg) => {
+        console.log(`💬 message from ${socket.id}: ${msg}`);
+        socket.broadcast.to(`${room}`).emit('newMsg', msg);
+
+    });
+
+    socket.on('joinRoom', (room) => {
+        console.log(`room: ${room}🔌 User joined room: ${socket.id} in room: ${room}`);
+        socket.join(`${room}`);
+    });
+    socket.on('leaveRoom', (room) => {
+        console.log(`room: ${room}❌ User left room: ${socket.id} in room: ${room}`);
+        socket.leave(`${room}`);
+    });
+
+    // when the client disconnects from the server
+    socket.on('disconnect', () => {
+        console.log(`❌ User disconnected: ${socket.id}`);
+    });
+});
+
+// start the http server 
+// and the socket.io server is connected to the http server
+server.listen(port, () => {
+    console.log(`🔥 Server running at http://localhost:${port}`);
+});
+
 // Start auto refresh the server
 const path = require('path') // for serving static files from the root directory
 const livereload = require('livereload') // for livereload server
@@ -80,8 +140,8 @@ const userRoutes = require('./routes/userRoutes') // for the user routes
 app.use('/user', userRoutes) // if you want to use the routes in the user initial file
 
 mongoose.connection.once('open', (err) => {
-    console.log('Connecting to server')
-    // تشغيل السيرفر
+    console.log('Connecting to mongoose server')
+    // start the mongoose server 
     app.listen(port, () => {
         console.log(`App listening on port ${port}, open => http://localhost:${port} inside your browser to see the result`)
     })

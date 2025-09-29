@@ -19,5 +19,14 @@ router.get('/success', (req, res) => { // Success page
         message: "Success page",
     })
 })
+// Chat
+router.get('/demoChat', (req, res) => { // Success page
+    res.render('../views/chat/demoChat', { title: 'Socket' })
+
+})
+router.get('/chat', (req, res) => { // Success page
+    res.render('../views/chat/chatFriendWithGroup', { title: 'FriendWithGroup' })
+
+})
 
 module.exports = router
