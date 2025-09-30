@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs')
 const slugify = require('slugify')
 const jwt = require('jsonwebtoken')
 
-
 const getAccessToken = (user) => {
     return jwt.sign({ id: user._id, email: user.email }, process.env.AccessTokenSecret, { expiresIn: "1h" });
 }
@@ -13,7 +12,8 @@ const getRefreshToken = (user) => {
 
 
 const signup = async (req, res) => {
-    const { name, email, password, phone, profilePicture } = req.body;
+    const { name, email, password, phone } = req.body;
+    const profilePicture = req.file;
     if (!name || !email || !password || !phone || !profilePicture) return res.status(400).json({ message: "يجب أن يكون لديك كل البيانات ❌" });
     if (password.length < 8) return res.status(400).json({ message: "يجب أن يكون لديك كلمة مرور طويلة ❌" });
     if (!email.includes('@')) return res.status(400).json({ message: "يجب أن يكون لديك بريد إلكتروني صالح ❌" });
@@ -22,7 +22,17 @@ const signup = async (req, res) => {
 
     // تشفير كلمة السر
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = { name: name, email: email, password: hashedPassword, phone: phone, profilePicture: profilePicture, createdAt: new Date(), updatedAt: new Date(), slug: slugify(name) };
+    const newUser = {
+        name: name,
+        email: email,
+        password: hashedPassword,
+        phone: phone,
+        profilePicture:
+            profilePicture ? `${req.protocol}://${req.get('host')}/uploads/${profilePicture.filename}` : null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        slug: slugify(name)
+    };
     await User.create(newUser);
     const accessToken = getAccessToken(newUser);
     const refreshToken = getRefreshToken(newUser);
@@ -31,7 +41,7 @@ const signup = async (req, res) => {
         httpOnly: true,// accessToken is accessible only by web server not any script or code
         secure: true, // for security for to accessible by https not http
         sameSite: "strict", // for save cookie for to accessible by the same domain not any other site
-        aggregate: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
     });
 
 
@@ -68,7 +78,7 @@ const login = async (req, res) => {
         httpOnly: true,// accessToken is accessible only by web server not any script or code
         secure: true, // for security for to accessible by https not http
         sameSite: "strict", // for save cookie for to accessible by the same domain not any other site
-        aggregate: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
     });
 
 

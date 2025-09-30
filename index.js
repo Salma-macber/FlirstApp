@@ -8,6 +8,7 @@ const connectDB = require('./controllers/dbController') // for connecting to the
 // import express from 'express'
 const app = express()
 const port = process.env.PORT || 3000
+const port2 = process.env.PORT2 || 3001
 
 const http = require('http');
 const { Server } = require('socket.io');
@@ -64,8 +65,8 @@ io.on('connection', (socket) => {
 
 // start the http server 
 // and the socket.io server is connected to the http server
-server.listen(port, () => {
-    console.log(`🔥 Server running at http://localhost:${port}`);
+server.listen(port2, () => {
+    console.log(`🔥 Server running at http://localhost:${port2}`);
 });
 
 // Start auto refresh the server
