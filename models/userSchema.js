@@ -11,6 +11,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         lowercase: true,
     },
+    gender: {
+        type: String,
+        lowercase: true,
+    },
+    country: {
+        type: String,
+    },
+    age: {
+        type: Number,
+    },
     email: {
         type: String,
         required: [true, 'email is required'],

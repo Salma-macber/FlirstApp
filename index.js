@@ -148,16 +148,20 @@ liveReloadServer.server.once('connection', () => {
 // End auto refresh the server
 
 connectDB()
-
+//Start Routes
 //Start authRoutes
 const authRoutes = require('./routes/authRoutes') // for the Auth routes
 app.use('/auth', authRoutes) // if you want to use the routes in the user initial file
-//Start allRoutes
-const allRoutes = require('./routes/allRoutes') // for the routes
-app.use(allRoutes)
-//End allRoutes
+//Start chatRoutes
+const chatRoutes = require('./routes/chatRoutes') // for the chat routes
+app.use(chatRoutes)
+//Start notesRoutes
+const notesRoutes = require('./routes/notesRoutes') // for the routes
+app.use(notesRoutes)
+//Start userRoutes
 const userRoutes = require('./routes/userRoutes') // for the user routes
 app.use('/user', userRoutes) // if you want to use the routes in the user initial file
+//End Routes
 
 mongoose.connection.once('open', (err) => {
     console.log('Connecting to mongoose server')
@@ -182,4 +186,4 @@ mongoose.connection.once('open', (err) => {
 
 
 // to kill the process
-//lsof -ti:3100 | xargs kill -9
+//lsof -ti:3000 | xargs kill -9

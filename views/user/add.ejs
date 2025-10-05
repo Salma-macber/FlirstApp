@@ -57,46 +57,50 @@
     </svg>
 
     <main class="d-flex flex-nowrap">
-      <%- include('../components/sidebar', { active: 'add', user: user }) %>
+      <%- include('../components/sidebar', { active: 'add' , user: user }) %>
 
         <div class="b-example-divider b-example-vr"></div>
 
         <section class="w-100">
           <%- include('../components/navbar.ejs') %>
 
-            <form class="mx-0 row gx-3 gy-4 mt-3" action="/user/add" method="post">
+            <form class="mx-0 row gx-3 gy-4 mt-3" action="/user/add" method="post" enctype="multipart/form-data">
               <div class="col-md-6">
-                <label for="inputfirstName4" class="form-label">First Name:</label>
-                <input placeholder="Ali..." type="text" class="form-control" id="inputfirstName4"
-                  name="userFirstName" />
+                <label for="inputfirstName4" class="form-label">Full Name:</label>
+                <input placeholder="Ali..." type="text" class="form-control" id="inputfirstName4" name="name" />
               </div>
-              <div class="col-md-6">
-                <label for="inputlastName4" class="form-label">Last Name:</label>
+              <!-- <div class="col-md-6">
+                <label for="inputlastName4"  class="form-label">Last Name:</label>
                 <input placeholder="Hassan..." type="text" class="form-control" id="inputlastName4"
                   name="userLastName" />
-              </div>
+              </div> -->
 
               <div class="col-md-6">
                 <label for="inputemail4" class="form-label">Email:</label>
-                <input placeholder="ali@gmail.com" type="email" class="form-control" id="inputemail4"
-                  name="userEmail" />
+                <input placeholder="ali@gmail.com" type="email" class="form-control" id="inputemail4" name="email" />
               </div>
               <div class="col-md-6">
                 <label for="inputtele4" class="form-label">Telephone:</label>
-                <input placeholder="011987899" type="number" class="form-control" id="inputtele4" name="userPhone" />
+                <input placeholder="011987899" type="number" class="form-control" id="inputtele4" name="phone" />
               </div>
-
+              <div>
+                <div class="col-md-6">
+                  <label for="inputage4" class="form-label">Picture:</label>
+                  <input placeholder="Your Picture: ..." type="file" class="form-control" id="inputage4"
+                    accept="image/*" name="profilePicture" />
+                </div>
+              </div>
               <div>
                 <div class="col-md-6">
                   <label for="inputage4" class="form-label">Age:</label>
-                  <input placeholder="Your Age: ..." type="number" class="form-control" id="inputage4" name="userAge" />
+                  <input placeholder="Your Age: ..." type="number" class="form-control" id="inputage4" name="age" />
                 </div>
               </div>
 
               <div>
                 <div class="col-md-6">
                   <label for="inputCountry" class="form-label">Country:</label>
-                  <select id="inputCountry" class="form-select" name="userCountry">
+                  <select id="inputCountry" class="form-select" name="country">
                     <option selected hidden disabled>Choose here ...</option>
 
                     <% const countryList=[ "Afghanistan" , "Albania" , "Algeria" , "American Samoa" , "Andorra"
@@ -159,14 +163,23 @@
               <div>
                 <div class="col-md-6">
                   <label for="inputGender" class="form-label">Gender:</label>
-                  <select id="inputGender" class="form-select" name="userGender">
+                  <select id="inputGender" class="form-select" name="gender">
                     <option selected hidden disabled>Choose here ...</option>
                     <option>Male</option>
                     <option>Female</option>
                   </select>
                 </div>
               </div>
-
+              <div>
+                <div class="col-md-6">
+                  <label for="inputRole" class="form-label">Role:</label>
+                  <select id="inputRole" class="form-select" name="role">
+                    <option selected hidden disabled>Choose here ...</option>
+                    <option>admin</option>
+                    <option>user</option>
+                  </select>
+                </div>
+              </div>
               <div class="col-12">
                 <button type="submit" class="btn btn-primary">Submit</button>
               </div>
