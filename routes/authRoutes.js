@@ -7,9 +7,13 @@ const authController = require('../controllers/authController')
 
 router.post("/signup", upload.single('profilePicture'), authController.signup);
 
+router.get("/login", authController.openLoginForm);
+
 router.post("/login", authController.login);
 
 router.get("/refresh", authController.refresh);
+
+router.get("/logout", authController.logout);
 
 router.post("/logout", authController.logout);
 

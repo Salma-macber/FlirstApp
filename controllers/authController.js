@@ -44,13 +44,41 @@ const signup = async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
     });
 
+    // save user in session after registration
+    req.session.user = {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone,
+        profilePicture: newUser.profilePicture,
+        slug: newUser.slug,
+        createdAt: newUser.createdAt
+    };
+    req.session.accessToken = accessToken;
+    req.session.refreshToken = refreshToken;
+    req.session.loginTime = new Date();
+    req.session.isAuthenticated = true;
 
-    res.status(200).json({
-        message: "تم التسجيل بنجاح ✅",
-        user: newUser,
-        accessToken: accessToken
+    // Save session explicitly to ensure it's persisted
+    req.session.save((err) => {
+        if (err) {
+            console.error('Session save error during signup:', err);
+            return res.status(500).json({ message: "خطأ في حفظ الجلسة ❌" });
+        }
+
+        console.log('Session saved successfully for new user:', newUser.email);
+        res.status(200).json({
+            message: "تم التسجيل بنجاح ✅",
+            user: newUser,
+            accessToken: accessToken
+        });
+        // res.redirect('/success')
     });
-    // res.redirect('/success')
+}
+
+const openLoginForm = async (req, res) => {
+    res.render('../views/auth/login.ejs')
+
 }
 
 const login = async (req, res) => {
@@ -81,11 +109,36 @@ const login = async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
     });
 
+    // save user in session
+    req.session.user = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        profilePicture: user.profilePicture,
+        slug: user.slug,
+        createdAt: user.createdAt
+    };
+    req.session.accessToken = accessToken;
+    req.session.refreshToken = refreshToken;
+    req.session.loginTime = new Date();
+    req.session.isAuthenticated = true;
 
-    // ✅ choose one response, not both
-    res.json({ message: "تم تسجيل الدخول ✅", accessToken });
-    // OR
-    // res.redirect('/success');
+    // Save session explicitly to ensure it's persisted
+    req.session.save((err) => {
+        if (err) {
+            console.error('Session save error:', err);
+            return res.status(500).json({ message: "خطأ في حفظ الجلسة ❌" });
+        }
+
+        console.log('Session saved successfully for user:', user.email);
+        // ✅ choose one response, not both
+        // res.json({ message: "تم تسجيل الدخول ✅", accessToken });
+        // OR
+        // res.redirect('/success')
+        // OR
+        res.redirect('/chat');
+    });
 }
 
 const refresh = async (req, res) => {
@@ -103,9 +156,18 @@ const refresh = async (req, res) => {
 }
 
 const logout = async (req, res) => {
-    res.clearCookie("refreshToken");
-    res.json({ message: "تم تسجيل الخروج ✅" });
-    // res.redirect('/login')
+    // Destroy session with callback to ensure it's properly removed from MongoDB
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Session destruction error:', err);
+            return res.status(500).json({ message: "خطأ في تسجيل الخروج ❌" });
+        }
+
+        console.log('Session destroyed successfully');
+        res.clearCookie("refreshToken");
+        // res.json({ message: "تم تسجيل الخروج ✅" });
+        res.redirect('/auth/login');
+    });
 }
 
 const forgotPassword = async (req, res) => {
@@ -172,7 +234,7 @@ const changePassword = async (req, res) => {
     }
 }
 
-module.exports = { signup, login, refresh, logout, forgotPassword, resetPassword, changePassword }
+module.exports = { signup, login, refresh, logout, forgotPassword, resetPassword, changePassword, openLoginForm }
 
 
 

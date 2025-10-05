@@ -3,12 +3,29 @@ const express = require('express')
 const dotenv = require('dotenv') // for loading the environment variables
 dotenv.config({ path: './config.env' }) // for loading the environment variables
 const mongoose = require('mongoose') // for connecting to the database
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+
 // app.use(mongoose)
 const connectDB = require('./controllers/dbController') // for connecting to the database
 // import express from 'express'
 const app = express()
-const port = process.env.PORT || 3000
-const port2 = process.env.PORT2 || 3001
+app.use(session({
+    secret: process.env.SECRET_KEY,   // change to env var
+    resave: false,  // don't save session if unmodified
+    saveUninitialized: false,  // don't create session until something stored
+    store: MongoStore.create({
+        mongoUrl: process.env.DATABASE_URL,
+        touchAfter: 24 * 3600, // lazy session update (24 hours)
+        ttl: 7 * 24 * 60 * 60, // 7 days in seconds
+    }),
+    cookie: {
+        secure: false,  // set true only if HTTPS
+        maxAge: 1000 * 60 * 60 * 24 * 7  // 7 days (in ms)
+    }
+}));
+const port = process.env.MAIN_PORT || 3000
+const port2 = process.env.SOCKET_PORT || 3000
 
 const http = require('http');
 const { Server } = require('socket.io');
@@ -16,7 +33,7 @@ const server = http.createServer(app);
 // setup Socket.IO
 const io = new Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL || process.env.BACKEND_URL, // you can change it to http://localhost:3000 for example
+        origin: process.env.SOCKET_FRONTEND_URL || process.env.SOCKET_BACKEND_URL, // you can change it to http://localhost:3000 for example
         methods: ['GET', 'POST'],
     },
 });
@@ -147,3 +164,20 @@ mongoose.connection.once('open', (err) => {
         console.log(`App listening on port ${port}, open => http://localhost:${port} inside your browser to see the result`)
     })
 })
+
+
+
+
+
+
+// Master process: هو المسؤول عن إنشاء ومراقبة الـ workers.
+
+// Worker processes: هم اللي بيتعاملوا مع الـ requests.
+
+
+
+
+
+
+// to kill the process
+//lsof -ti:3100 | xargs kill -9

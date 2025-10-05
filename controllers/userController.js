@@ -3,16 +3,21 @@ const userSchema = require('../models/userSchema')
 const moment = require('moment')
 
 const getAllData = (req, res) => {
+
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) res.render('auth/login');
+    if (!refreshToken) res.render('../views/auth/login');
+    // If you need to send the token as a header to the client, you can set it in the response headers.
+    // For example, if you have a token (e.g., refreshToken), you can do:
 
     userSchema.find().select('-password').lean()
         .then((result) => {
             console.log(result)
-            res.status(200).json({
-                message: "Data fetched successfully",
-                data: result
-            })
+            // res.status(200).json({
+            //     message: "Data fetched successfully",
+            //     data: result
+            // })
+            res.render('../views/home', { myTitle: 'Home Page', data: result, moment: moment })
+
             // res.render('home', { myTitle: 'Home Page', data: result, moment: moment }) // Render the home page
         })
         .catch((err) => {

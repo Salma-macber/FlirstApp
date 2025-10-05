@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Friend With Group</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid justify-content-center justify-content-md-between">
+            <a class="navbar-brand fw-medium fs-3 mb-1 mb-md-0 <%= tab==='chats' ? 'text-success' : 'text-dark' %>"
+                href="/chat?tab=chats">
+                My Chats
+            </a>
+            <a class="navbar-brand fw-medium fs-3 mb-1 mb-md-0 <%= tab==='friends' ? 'text-success' : 'text-dark' %>"
+                href="/chat?tab=friends" <%=tab==='friends' ? 'active' : '' %> >
+                My Friends Requests
+            </a>
+            <a class="navbar-brand fw-medium fs-3 mb-1 mb-md-0 <%= tab==='profile' ? 'text-success' : 'text-dark' %>"
+                href="/chat?tab=profile" <%=tab==='profile' ? 'active' : '' %>>
+                My Profile
+            </a>
+
+
+        </div>
+    </nav>
+
+
+    <% if (tab==='chats' ) { %>
+        <div>
+            <!-- My Chats Content -->
+
+            <% if (typeof chats !=='undefined' && chats.length> 0) { %>
+                <ul class="list-group">
+                    <% chats.forEach(function(chat) { %>
+                        <li class="list-group-item">
+                            <a href="/chat/<%= chat.id %>">
+                                <%= chat.name %>
+                            </a>
+                        </li>
+                        <% }) %>
+                </ul>
+                <% } else { %>
+                    <p>No chats available.</p>
+                    <% } %>
+        </div>
+        <% } else if (tab==='friends' ) { %>
+            <div>
+                <!-- Friends Requests Content -->
+                <% if (typeof friendRequests !=='undefined' && friendRequests.length> 0) { %>
+                    <ul class="list-group">
+                        <% friendRequests.forEach(function(request) { %>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <%= request.name %>
+                                </span>
+                                <div>
+                                    <form action="/chat/friends/accept/<%= request.id %>" method="POST"
+                                        class="d-inline">
+                                        <button class="btn btn-success btn-sm" type="submit">Accept</button>
+                                    </form>
+                                    <form action="/chat/friends/decline/<%= request.id %>" method="POST"
+                                        class="d-inline">
+                                        <button class="btn btn-danger btn-sm" type="submit">Decline</button>
+                                    </form>
+                                </div>
+                            </li>
+                            <% }) %>
+                    </ul>
+                    <% } else { %>
+                        <p>No friend requests.</p>
+                        <% } %>
+            </div>
+            <% } else if (tab==='profile' ) { %>
+
+                <%- include('../auth/profile', { active: 'profile' }) %>
+
+                    <% } %>
+
+                        <script
+                            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

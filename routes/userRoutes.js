@@ -51,13 +51,14 @@ router.delete('/delete/:id', (req, res) => {
 // View page with all data by id
 router.get('/view/:id', (req, res) => {
     const id = req.params.id
+    
     userSchema.findById({ _id: id })
         .then((result) => {
-            res.status(200).json({
-                message: "Data fetched successfully",
-                data: result
-            })
-            // res.render('user/view', { myTitle: 'View User', data: result, moment: moment })
+            // res.status(200).json({
+            //     message: "Data fetched successfully",
+            //     data: result
+            // })
+            res.render('user/view', { myTitle: 'View User', data: result, moment: moment })
         })
 })
 
