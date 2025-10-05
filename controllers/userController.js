@@ -16,7 +16,7 @@ const getAllData = (req, res) => {
             //     message: "Data fetched successfully",
             //     data: result
             // })
-            res.render('../views/home', { myTitle: 'Home Page', data: result, moment: moment })
+            res.render('../views/home', { myTitle: 'Home Page', data: result, moment: moment, user: req.session.user })
 
             // res.render('home', { myTitle: 'Home Page', data: result, moment: moment }) // Render the home page
         })

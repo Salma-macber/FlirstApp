@@ -51,7 +51,7 @@ router.delete('/delete/:id', (req, res) => {
 // View page with all data by id
 router.get('/view/:id', (req, res) => {
     const id = req.params.id
-    
+
     userSchema.findById({ _id: id })
         .then((result) => {
             // res.status(200).json({
@@ -69,7 +69,8 @@ router.post('/add', (req, res) => {
             console.log('Data saved successfully')
             res.status(200).json({
                 message: "Data saved successfully",
-                data: result
+                data: result,
+                user: req.session.user
             })
             // res.redirect('/success') // Redirect back to home page after successful save
         })
@@ -115,10 +116,10 @@ router.post('/search', (req, res) => {
             res.status(500).send('Error fetching data from database')
         })
 })
+router.get('/add', (req, res) => { // Add page
+    res.render('user/add', { user: req.session.user })
+})
 ///////////////////////////////////////////////////////////////
-// router.get('/add', (req, res) => { // Add page
-//     res.render('user/add')
-// })
 // router.get('/edit', (req, res) => { // Edit page
 //     res.render('user/edit', { myTitle: 'Edit User' })
 // })
