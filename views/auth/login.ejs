@@ -28,6 +28,14 @@
 
 
         <section class="w-100">
+            <div class="container mt-3">
+                <% if (typeof message !=='undefined' && message) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <%= message %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <% } %>
+            </div>
 
             <form class="mx-0 row gx-3 gy-4 mt-3" action="/auth/login" method="post">
 
@@ -47,7 +55,11 @@
 
 
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+
+                <div class="col-12 text-center mt-3">
+                    <a href="/auth/forgot-password" class="btn btn-link">Forgot Password?</a>
                 </div>
             </form>
         </section>

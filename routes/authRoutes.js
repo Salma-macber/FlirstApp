@@ -15,9 +15,13 @@ router.get("/refresh", authController.refresh);
 
 router.get("/logout", authController.logout);
 
-router.post("/logout", authController.logout);
+// router.post("/logout", authController.logout);
+
+router.get("/forgot-password", authController.getForgotPasswordForm);
 
 router.post("/forgot-password", authController.forgotPassword);
+
+router.get("/reset-password", authController.getResetPasswordForm);
 
 router.post("/reset-password", authController.resetPassword);
 

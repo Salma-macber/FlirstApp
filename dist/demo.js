@@ -115,4 +115,71 @@ class PersonClass extends UserClass {
 const personClass = new PersonClass(1234567890);
 console.log(personClass.email);
 console.log(personClass.getPhone());
+function identity(arg) {
+    return arg;
+}
+console.log(identity("Hello World"));
+console.log(identity(1234567890));
+console.log(identity(true));
+console.log(identity(["Hello", "World"]));
+console.log(identity([1, 2, 3, 4, 5]));
+console.log(identity([true, false, true]));
+function merge(a, b) {
+    return { ...a, ...b };
+}
+console.log(merge("Hello", 1234567890));
+console.log(merge("Hello", true));
+console.log(merge(1234567890, true));
+console.log(merge(["Hello", "World"], [1, 2, 3, 4, 5]));
+console.log(merge(1234567890, [true, false, true]));
+function combine2(a, b) {
+    return 'the value is ' + a + ' and ' + b;
+}
+console.log(combine2("Hello", 1234567890));
+console.log(combine2("Hello", true));
+console.log(combine2(1234567890, true));
+console.log(combine2(["Hello", "World"], [1, 2, 3, 4, 5]));
+console.log(combine2(1234567890, [true, false, true]));
+class GenericClass {
+    constructor(a, b) {
+        this.a = a;
+        this.b = b;
+        this.a = a;
+        this.b = b;
+    }
+    getA() {
+        return this.a;
+    }
+    getB() {
+        return this.b;
+    }
+}
+const genericClass = new GenericClass("Hello", 1234567890);
+console.log(genericClass.getA());
+console.log(genericClass.getB());
+const genericClass2 = new GenericClass(1234567890, ["Hello", "World"]);
+console.log(genericClass2.getA());
+console.log(genericClass2.getB());
+const genericClass3 = new GenericClass('1234567890', ["Hello", "World"]);
+console.log(genericClass3.getA());
+console.log(genericClass3.getB());
+class Collection {
+    constructor() {
+        this.items = [];
+    }
+    add(item) {
+        this.items.push(item);
+    }
+    getItems() {
+        return this.items;
+    }
+}
+const collection = new Collection();
+collection.add({ title: "The Great Gatsby", author: "F. Scott Fitzgerald", pages: 180 });
+collection.add({ title: "1984", author: "George Orwell", pages: 328 });
+console.log(collection.getItems());
+const collection2 = new Collection();
+collection2.add({ title: "The Witcher 3", style: "RPG", rating: 9.5, price: 59.99 });
+collection2.add({ title: "Fortnite", style: "Battle Royale", rating: 8.5, price: 0 });
+console.log(collection2.getItems());
 //# sourceMappingURL=demo.js.map

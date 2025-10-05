@@ -5,11 +5,13 @@ dotenv.config({ path: './config.env' }) // for loading the environment variables
 const mongoose = require('mongoose') // for connecting to the database
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const flash = require('connect-flash');
 
 // app.use(mongoose)
 const connectDB = require('./controllers/dbController') // for connecting to the database
 // import express from 'express'
 const app = express()
+app.use(flash());
 app.use(session({
     secret: process.env.SECRET_KEY,   // change to env var
     resave: false,  // don't save session if unmodified

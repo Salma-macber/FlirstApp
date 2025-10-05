@@ -61,4 +61,35 @@ declare class PersonClass extends UserClass {
     getPhone(): number;
 }
 declare const personClass: PersonClass;
+declare function identity<T>(arg: T): T;
+declare function merge<T, U>(a: T, b: U): T & U;
+declare function combine2<T, S>(a: T, b: S): String;
+declare class GenericClass<T, S> {
+    private a;
+    private b;
+    constructor(a: T, b: S);
+    getA(): T;
+    getB(): S;
+}
+declare const genericClass: GenericClass<string, number>;
+declare const genericClass2: GenericClass<number, String[]>;
+declare const genericClass3: GenericClass<number | String, String[]>;
+interface Book {
+    title: string;
+    author: string;
+    pages: number;
+}
+interface Game {
+    title: string;
+    style: string;
+    rating: number;
+    price: number;
+}
+declare class Collection<T> {
+    private items;
+    add(item: T): void;
+    getItems(): T[];
+}
+declare const collection: Collection<Book>;
+declare const collection2: Collection<Game>;
 //# sourceMappingURL=demo.d.ts.map

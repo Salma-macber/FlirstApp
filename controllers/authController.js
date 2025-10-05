@@ -2,6 +2,8 @@ const User = require('../models/userSchema')
 const bcrypt = require('bcryptjs')
 const slugify = require('slugify')
 const jwt = require('jsonwebtoken')
+// const crypto = require('crypto')
+// const { sendPasswordResetEmail, sendWelcomeEmail } = require('../services/emailService')
 
 const getAccessToken = (user) => {
     return jwt.sign({ id: user._id, email: user.email }, process.env.AccessTokenSecret, { expiresIn: "1h" });
@@ -77,9 +79,46 @@ const signup = async (req, res) => {
 }
 
 const openLoginForm = async (req, res) => {
-    res.render('../views/auth/login.ejs')
-
+    const { message } = req.query;
+    res.render('../views/auth/login.ejs', { message })
 }
+
+const getForgotPasswordForm = async (req, res) => {
+    res.render('../views/auth/forgot-password.ejs')
+}
+
+const getResetPasswordForm = async (req, res) => {
+    res.render('../views/auth/reset-password.ejs')
+}
+
+// const getResetPasswordForm = async (req, res) => {
+//     const { token } = req.query;
+
+//     if (!token) {
+//         return res.status(400).render('../views/auth/reset-password.ejs', {
+//             error: 'الرمز مطلوب ❌',
+//             token: null
+//         });
+//     }
+
+//     // Verify token is valid and not expired
+//     const user = await User.findOne({
+//         resetPasswordToken: token,
+//         resetPasswordExpires: { $gt: Date.now() }
+//     });
+
+//     if (!user) {
+//         return res.status(400).render('../views/auth/reset-password.ejs', {
+//             error: 'الرمز غير صحيح أو منتهي الصلاحية ❌',
+//             token: null
+//         });
+//     }
+
+//     res.render('../views/auth/reset-password.ejs', {
+//         error: null,
+//         token: token
+//     });
+// }
 
 const login = async (req, res) => {
     console.log('login')
@@ -171,21 +210,74 @@ const logout = async (req, res) => {
 }
 
 const forgotPassword = async (req, res) => {
-    const { email } = req.body;
-    const user = await User.findOne({ email: email });
-    if (!user) return res.status(400).json({ message: "المستخدم غير موجود ❌" });
-    res.json({ message: "تم إرسال كلمة السر إلى البريد الإلكتروني ✅", password });
+    console.log('forgotPassword ')
+    try {
+        const { email } = req.body;
+        console.log('email ', email)
+        console.log('req.body ', req.body)
+        if (!email) {
+            return res.status(400).json({ message: "البريد الإلكتروني مطلوب ❌" });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) {
+            return res.status(400).json({ message: "المستخدم غير موجود ❌" });
+        }
+
+        // For demo purposes, we'll just return a success message
+        // In a real app, you would send an email with OTP
+        res.json({
+            message: "تم إرسال رمز OTP إلى بريدك الإلكتروني ✅ (استخدم 1234 للاختبار)",
+            success: true
+        });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        return res.status(500).json({
+            message: "خطأ في الخادم، حاول مرة أخرى لاحقاً ❌"
+        });
+    }
 }
 
 const resetPassword = async (req, res) => {
-    const { email, password, otp } = req.body;
-    const user = await User.findOne({ email: email });
-    if (!user) return res.status(400).json({ message: "المستخدم غير موجود ❌" });
-    if (otp !== "1234") return res.status(400).json({ message: "الرمز غير صحيح ❌" });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
-    await user.save();
-    res.json({ message: "تم تعديل كلمة السر ✅" });
+    console.log('resetPassword ')
+    try {
+        const { email, password, otp } = req.body;
+        console.log('email ', email)
+        console.log('password ', password)
+        console.log('otp ', otp)
+        console.log('req.body ', req.body)
+        if (!email || !password || !otp) {
+            return res.status(400).json({ message: "جميع الحقول مطلوبة ❌" });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ message: "كلمة المرور يجب أن تكون 8 أحرف على الأقل ❌" });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user) {
+            return res.status(400).json({ message: "المستخدم غير موجود ❌" });
+        }
+
+        if (otp !== "1234") {
+            return res.status(400).json({ message: "الرمز غير صحيح ❌" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        console.log(`Password reset successful for user: ${user.email}`);
+        res.json({
+            message: "تم تغيير كلمة المرور بنجاح ✅",
+            success: true
+        });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        return res.status(500).json({
+            message: "خطأ في الخادم، حاول مرة أخرى لاحقاً ❌"
+        });
+    }
 }
 
 // Change password
@@ -234,7 +326,7 @@ const changePassword = async (req, res) => {
     }
 }
 
-module.exports = { signup, login, refresh, logout, forgotPassword, resetPassword, changePassword, openLoginForm }
+module.exports = { signup, login, refresh, logout, forgotPassword, resetPassword, changePassword, openLoginForm, getForgotPasswordForm, getResetPasswordForm }
 
 
 
