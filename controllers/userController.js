@@ -1,5 +1,4 @@
 const userSchema = require('../models/userSchema')
-
 const moment = require('moment')
 const bcrypt = require('bcryptjs')
 const slugify = require('slugify')
@@ -250,5 +249,147 @@ const updateProfile = async (req, res) => {
         });
     }
 }
+const settingsView = (req, res) => {
+    res.render('../views/settings', {
+        title: 'Settings',
+        user: req.session.user,
+        message: req.query.message,
+        error: req.query.error
+    })
+}
 
-module.exports = { profile, viewHome, getAllData, addUser, deleteUser, editUser, getUserById, addUserView, updateUser, searchUser, editUserView, profile, editProfileView, updateProfile }
+
+// Update profile picture
+const updateProfilePicture = async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+
+        const updatedUser = await userSchema.findByIdAndUpdate(
+            { _id: userId },
+            { profilePicture: req.file.path },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Update session
+        req.session.user.profilePicture = updatedUser.profilePicture;
+
+        res.json({ success: true, message: 'Profile picture updated successfully' });
+    } catch (error) {
+        console.error('Error updating profile picture:', error);
+        res.status(500).json({ success: false, message: 'Error updating profile picture' });
+    }
+}
+
+// Change password
+const changePassword = async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ success: false, message: 'New passwords do not match' });
+        }
+
+        const user = await userSchema.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Verify current password
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isCurrentPasswordValid) {
+            return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+        }
+
+        // Hash new password
+        const saltRounds = 10;
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update password
+        await userSchema.findByIdAndUpdate(
+            { _id: userId },
+            { password: hashedNewPassword }
+        );
+
+        res.json({ success: true, message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ success: false, message: 'Error changing password' });
+    }
+}
+
+// Delete account
+const deleteAccount = async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+
+        const deletedUser = await userSchema.findByIdAndDelete(userId);
+        if (!deletedUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Destroy session
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Error destroying session:', err);
+            }
+        });
+
+        res.json({ success: true, message: 'Account deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        res.status(500).json({ success: false, message: 'Error deleting account' });
+    }
+}
+
+// Export user data
+const exportData = async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+        const user = await userSchema.findById(userId).select('-password');
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const exportData = {
+            personalInfo: {
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                age: user.age,
+                gender: user.gender,
+                country: user.country,
+                profilePicture: user.profilePicture,
+                role: user.role,
+                isActive: user.isActive,
+                slug: user.slug,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt
+            },
+            settings: user.settings || {},
+            exportDate: new Date().toISOString()
+        };
+
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename="my-profile-data-export.json"');
+        res.json(exportData);
+    } catch (error) {
+        console.error('Error exporting data:', error);
+        res.status(500).json({ success: false, message: 'Error exporting data' });
+    }
+}
+
+module.exports = {
+    profile, viewHome, getAllData, addUser, deleteUser, editUser, getUserById, addUserView, updateUser,
+    searchUser, editUserView, profile, editProfileView, updateProfile, settingsView,
+    updateProfilePicture, changePassword, deleteAccount, exportData
+}
