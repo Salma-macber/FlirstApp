@@ -1,0 +1,106 @@
+.file-upload-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.file-upload-input {
+    display: none;
+}
+
+.file-upload-label {
+    display: block;
+    width: 100%;
+    padding: 1rem 0.75rem 0.5rem 3rem;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    min-height: 58px;
+}
+
+.file-upload-label:hover {
+    border-color: #667eea;
+}
+
+.file-upload-label.has-file {
+    border-color: #28a745;
+    background-color: #f8fff9;
+}
+
+.file-upload-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    z-index: 3;
+}
+
+.file-upload-text {
+    position: absolute;
+    left: 3rem;
+    top: 1rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.file-upload-filename {
+    position: absolute;
+    left: 3rem;
+    top: 0.5rem;
+    color: #28a745;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.file-upload-label:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+[data-bs-theme="dark"] .file-upload-label {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .file-upload-label:hover {
+    border-color: #667eea;
+}
+
+[data-bs-theme="dark"] .file-upload-label.has-file {
+    border-color: #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+[data-bs-theme="dark"] .file-upload-icon {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .file-upload-text {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .file-upload-filename {
+    color: #28a745;
+}
+
+.signup-link {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.signup-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.signup-link a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}

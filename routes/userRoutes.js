@@ -12,6 +12,8 @@ router.get('/add', hasRole(['admin']), userController.addUserView) // for apply 
 router.get('/edit', hasRole(['admin']), userController.editUserView);
 router.get('/edit/:id', hasRole(['admin']), userController.editUser)
 router.get("/profile", userController.profile);
+router.get("/profile/edit", userController.editProfileView);
+router.post("/profile/edit", upload.single('profilePicture'), userController.updateProfile);
 router.post('/add', hasRole(['admin']), upload.single('profilePicture'), userController.addUser)
 router.post('/search', userController.searchUser)
 router.put('/edit/:id', hasRole(['admin']), userController.updateUser)

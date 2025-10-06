@@ -5,6 +5,7 @@ const upload = require('../multerConfig')
 
 const authController = require('../controllers/authController')
 
+router.get("/signup", authController.openSignupForm);
 router.post("/signup", upload.single('profilePicture'), authController.signup);
 router.get("/login", authController.openLoginForm);
 router.post("/login", authController.login);

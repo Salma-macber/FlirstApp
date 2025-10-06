@@ -90,10 +90,12 @@ const updateUser = (req, res) => {
                 message: "Data updated successfully",
                 oldData: result
             })
+
             // res.redirect('/success') // Redirect back to home page after successful update
         }).catch((err) => {
             console.error('Error updating data:', err.message)
-            res.status(500).send('Error updating data to database', err.message)
+            // res.status(500).send('Error updating data to database', err.message)
+            res.redirect('/error', { message: err.message })
         })
 }
 const deleteUser = (req, res) => {
@@ -165,7 +167,88 @@ const viewHome = (req, res) => { // View page
     // res.render('user/view', { myTitle: 'View User' })
 }
 const profile = (req, res) => {
-    res.json({ message: "مرحباً بك 🙌", user: req.user });
-    // res.render('profile', { myTitle: 'Profile', user: req.user })
+    userSchema.findById({ _id: req.session.user.id })
+        .then((result) => {
+            // res.status(200).json({
+            //     message: "Data fetched successfully",
+            //     data: result
+            // })
+            res.render('../views/auth/my-profile', {
+                myTitle: 'Profile',
+                user: result,
+                moment: moment,
+                message: req.query.message
+            })
+        })
 }
-module.exports = { profile, viewHome, getAllData, addUser, deleteUser, editUser, getUserById, addUserView, updateUser, searchUser, editUserView, profile }
+const editProfileView = (req, res) => {
+    userSchema.findById({ _id: req.session.user.id })
+        .then((result) => {
+            // res.status(200).json({
+            //     message: "Data fetched successfully",
+            //     data: result
+            // })
+            res.render('../views/auth/edit-profile', { myTitle: 'Edit Profile', user: result, moment: moment })
+        })
+}
+
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+        const updateData = { ...req.body };
+
+        // Handle file upload for profile picture
+        if (req.file) {
+            updateData.profilePicture = req.file.path;
+        }
+
+        // Remove empty fields
+        Object.keys(updateData).forEach(key => {
+            if (updateData[key] === '' || updateData[key] === 'Not specified') {
+                delete updateData[key];
+            }
+        });
+
+        const updatedUser = await userSchema.findByIdAndUpdate(
+            { _id: userId },
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.render('../views/auth/edit-profile', {
+                myTitle: 'Edit Profile',
+                user: req.session.user,
+                message: 'User not found'
+            });
+        }
+
+        // Update session with new user data
+        req.session.user = {
+            id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            phone: updatedUser.phone,
+            age: updatedUser.age,
+            country: updatedUser.country,
+            gender: updatedUser.gender,
+            role: updatedUser.role,
+            profilePicture: updatedUser.profilePicture,
+            isActive: updatedUser.isActive,
+            slug: updatedUser.slug,
+            createdAt: updatedUser.createdAt
+        };
+
+        res.redirect('/user/profile?message=Profile updated successfully! ✅');
+
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.render('../views/auth/edit-profile', {
+            myTitle: 'Edit Profile',
+            user: req.session.user,
+            message: 'Error updating profile. Please try again.'
+        });
+    }
+}
+
+module.exports = { profile, viewHome, getAllData, addUser, deleteUser, editUser, getUserById, addUserView, updateUser, searchUser, editUserView, profile, editProfileView, updateProfile }

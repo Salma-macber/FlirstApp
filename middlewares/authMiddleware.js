@@ -1,38 +1,53 @@
 const jwt = require('jsonwebtoken')
+const User = require('../models/userSchema')
+const authController = require('../controllers/authController')
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     console.log('session ', req.session)
     console.log('accessToken ', req.session.accessToken)
     console.log('user ', req.session.user)
 
-    // const authHeader = req.headers["authorization"] || req.headers["Authorization"];
-    // if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ message: "مطلوب تسجيل الدخول ❌" });
-    // console.log('authHeader ', authHeader)
-    // const token = authHeader.split(" ")[1]; // "Bearer TOKEN"
-    // console.log('token ', token)
-    // if (!token) return res.status(401).json({ message: "مطلوب تسجيل الدخول ❌" });//401 Unauthorized
     if (!req.session.accessToken) {
         return res.render('../views/auth/login')
-        //  return res.status(401).json({ message: "مطلوب تسجيل الدخول ❌" });//401 Unauthorized
     }
 
     jwt.verify(req.session.accessToken, process.env.AccessTokenSecret, async (err, user) => {
-        if (err) return res.status(403).json({ message: "التوكن غير صالح ❌" });//403 Forbidden
-        req.user = user; // حفظ بيانات المستخدم
-        if (req.session.accessToken) {
-            req.headers['Authorization'] = `Bearer ${req.session.accessToken}`;
+        if (err) {
+            // Access token is invalid, try to refresh using refresh token
+            const refreshToken = req.cookies.refreshToken;
+            if (!refreshToken) {
+                return res.render('../views/auth/login')
+            }
 
-            // await res.setHeader('Authorization', `Bearer ${req.session.accessToken}`);
+            jwt.verify(refreshToken, process.env.RefreshToken, async (err, decoded) => {
+                console.log('decoded ', decoded)
+                if (err) {
+                    return res.render('../views/auth/login')
+                }
 
+                const user = await User.findById(decoded.id).exec();
+                if (!user) {
+                    return res.status(401).json({ message: "المستخدم غير موجود" });
+                }
+
+                const accessToken = authController.getAccessToken(user);
+                req.session.accessToken = accessToken;
+                req.user = user;
+
+                if (req.session.accessToken) {
+                    req.headers['Authorization'] = `Bearer ${req.session.accessToken}`;
+                }
+                next();
+            });
+        } else {
+            // Access token is valid
+            req.user = user;
+            if (req.session.accessToken) {
+                req.headers['Authorization'] = `Bearer ${req.session.accessToken}`;
+            }
+            next();
         }
-        next();
     });
 }
-// function authMiddleware(req, res, next) {
-//     if (!req.session.user) {
-//       return res.redirect('/login');
-//     }
-//     next();
-//   }
 
 module.exports = authMiddleware
