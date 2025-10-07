@@ -2,7 +2,7 @@ const User = require('../models/userSchema')
 const bcrypt = require('bcryptjs')
 const slugify = require('slugify')
 const jwt = require('jsonwebtoken')
-
+const reqPlatform = require('../services/reqPlatform')
 const getAccessToken = (user) => {
     return jwt.sign({ id: user._id, email: user.email }, process.env.AccessTokenSecret, { expiresIn: "1h" });
 }
@@ -18,51 +18,26 @@ const signup = async (req, res) => {
 
     // Validation errors - render signup page with error message and preserve form data
     if (!name || !email || !password || !phone || !profilePicture || !gender || !country || !age) {
-        console.log('!name || !email || !password || !phone || !profilePicture || !gender || !country || !age ')
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "Please fill in all required fields and upload a profile picture" });
-        }
-        else return res.render('../views/auth/registration.ejs', {
-            message: "Please fill in all required fields and upload a profile picture",
-            formData: { name, email, password, phone, gender, country, age }
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/registration.ejs', body: { message: "Please fill in all required fields and upload a profile picture", formData: { name, email, password, phone, gender, country, age } }
         });
+
     }
     if (password.length < 8) {
-        console.log('password.length < 8 ', password.length < 8)
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "Password must be at least 8 characters long" });
-        }
-        else return res.render('../views/auth/registration.ejs', {
-            message: "Password must be at least 8 characters long",
-            formData: { name, email, password, phone, gender, country, age }
-        });
-    }
-    if (!email.includes('@')) {
-        console.log('email.includes("@") ', email.includes('@'))
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "Please enter a valid email address" });
-        }
-        else return res.render('../views/auth/registration.ejs', {
-            message: "Please enter a valid email address",
-            formData: { name, email, password, phone, gender, country, age }
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/registration.ejs', body: { message: "Password must be at least 8 characters long", formData: { name, email, password, phone, gender, country, age } }
         });
     }
 
     const foundUser = await User.findOne({ email: email });
     if (foundUser) {
-        console.log('foundUser ', foundUser)
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "User already exists with this email" });
-        }
-        else return res.render('../views/auth/registration.ejs', {
-            message: "User already exists with this email",
-            formData: { name, email, password, phone, gender, country, age }
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/registration.ejs', body: { message: "User already exists with this email", formData: { name, email, password, phone, gender, country, age } }
         });
     }
 
     // تشفير كلمة السر
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('hashedPassword ', hashedPassword)
     const newUser = {
         name: name,
         email: email,
@@ -78,7 +53,7 @@ const signup = async (req, res) => {
         slug: slugify(name)
     };
     User.create(newUser).then((user) => {
-        console.log('user ', user)
+
         const accessToken = getAccessToken(user);
         const refreshToken = getRefreshToken(user);
 
@@ -110,34 +85,16 @@ const signup = async (req, res) => {
         // Save session explicitly to ensure it's persisted
         req.session.save((err) => {
             if (err) {
-                if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                    return res.status(500).json({ message: "Session save error during signup" });
-                }
-                else return res.render('../views/auth/registration.ejs', {
-                    message: "Session save error during signup",
-                    formData: { name, email, password, phone, gender, country, age }
-                });
-            }
-
-            // res.redirect('/auth/login?message=Registration successful! Please log in ✅');
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Registration successful! Please log in ✅",
-                    user: newUser,
-                    accessToken: accessToken
+                reqPlatform({
+                    req: req, res: res, path: '../views/auth/registration.ejs', body: { message: "Session save error during signup", formData: { name, email, password, phone, gender, country, age } }
                 });
             }
             else res.redirect('/success');
 
         });
     }).catch((err) => {
-        console.log('Error creating user:', err)
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(500).json({ message: "Error creating user" });
-        }
-        else return res.render('../views/auth/registration.ejs', {
-            message: err,
-            formData: { name, email, password, phone, gender, country, age }
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/registration.ejs', body: { message: err, formData: { name, email, password, phone, gender, country, age } }
         });
     });
 
@@ -145,32 +102,28 @@ const signup = async (req, res) => {
 
 const openSignupForm = async (req, res) => {
     const { message } = req.query;
-    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-        return res.status(200).json({ message: message });
-    }
-    else return res.render('../views/auth/registration.ejs', { message })
+    reqPlatform({
+        req: req, res: res, path: '../views/auth/registration.ejs', body: { message: message }
+    });
 }
 
 const openLoginForm = async (req, res) => {
     const { message } = req.query;
-    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-        return res.status(200).json({ message: message });
-    }
-    else return res.render('../views/auth/login.ejs', { message })
+    reqPlatform({
+        req: req, res: res, path: '../views/auth/login.ejs', body: { message: message }
+    });
 }
 
 const getForgotPasswordForm = async (req, res) => {
-    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-        return res.status(200).json({ message: "Forgot password form" });
-    }
-    else return res.render('../views/auth/forgot-password.ejs')
+    reqPlatform({
+        req: req, res: res, path: '../views/auth/forgot-password.ejs', body: { message: "Forgot password form" }
+    });
 }
 
 const getResetPasswordForm = async (req, res) => {
-    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-        return res.status(200).json({ message: "Reset password form" });
-    }
-    else return res.render('../views/auth/reset-password.ejs')
+    reqPlatform({
+        req: req, res: res, path: '../views/auth/reset-password.ejs', body: { message: "Reset password form" }
+    });
 }
 
 // const getResetPasswordForm = async (req, res) => {
@@ -203,61 +156,25 @@ const getResetPasswordForm = async (req, res) => {
 // }
 
 const login = async (req, res) => {
-    console.log('login')
     const { email, password } = req.body;
-    console.log('email ', email)
-    console.log('password ', password)
-
-    // Validation errors - render login page with error message
     if (!email || !password) {
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "Please fill in all required fields" });
-        }
-        else return res.render('../views/auth/login.ejs', {
-            message: "Please fill in all required fields"
-        });
-    }
-    if (password.length < 8) {
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "Password must be at least 8 characters long" });
-        }
-        else return res.render('../views/auth/login.ejs', {
-            message: "Password must be at least 8 characters long"
-        });
-    }
-    if (!email.includes('@')) {
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "Please enter a valid email address" });
-        }
-        else return res.render('../views/auth/login.ejs', {
-            message: "Please enter a valid email address"
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/login.ejs', body: { message: "Please fill in all required fields" }
         });
     }
 
     const user = await User.findOne({ email: email });
-    console.log('user ', user)
     if (!user) {
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "User not found" });
-        }
-        else return res.render('../views/auth/login.ejs', {
-            message: "User not found"
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/login.ejs', body: { message: "User not found" }
         });
     }
-
-    // مقارنة كلمة السر
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log('isMatch ', isMatch)
     if (!isMatch) {
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(400).json({ message: "Incorrect password" });
-        }
-        else return res.render('../views/auth/login.ejs', {
-            message: "Incorrect password"
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/login.ejs', body: { message: "Incorrect password" }
         });
     }
-
-    // إنشاء Token
     const accessToken = getAccessToken(user);
     const refreshToken = getRefreshToken(user);
 
@@ -288,19 +205,15 @@ const login = async (req, res) => {
     // Save session explicitly to ensure it's persisted
     req.session.save((err) => {
         if (err) {
-            console.error('Session save error:', err);
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(500).json({ message: "خطأ في حفظ الجلسة" });
-            }
-            else return res.render('../views/auth/login.ejs', {
-                message: "خطأ في حفظ الجلسة"
+            reqPlatform({
+                req: req, res: res, path: '../views/auth/login.ejs', body: { message: "Session save error during login" }
             });
         }
-
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(200).json({ message: "تم تسجيل الدخول ✅", accessToken, user: req.session.user });
+        else {
+            reqPlatform({
+                req: req, res: res, path: '../views/chat/demoChat.ejs', body: { message: " Login successful ✅" }
+            });
         }
-        else res.redirect('/chat');
     });
 }
 

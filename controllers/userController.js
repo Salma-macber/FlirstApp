@@ -2,15 +2,14 @@ const userSchema = require('../models/userSchema')
 const moment = require('moment')
 const bcrypt = require('bcryptjs')
 const slugify = require('slugify')
-
+const reqPlatform = require('../services/reqPlatform')
 const getAllData = (req, res) => {
 
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-        else return res.render('../views/auth/login');
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/login', body: { message: "Unauthorized" }
+        });
     }
     // If you need to send the token as a header to the client, you can set it in the response headers.
     // For example, if you have a token (e.g., refreshToken), you can do:
@@ -18,22 +17,19 @@ const getAllData = (req, res) => {
     userSchema.find().select('-password').lean()
         .then((result) => {
 
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data fetched successfully",
-                    data: result
-                });
-            }
-            else return res.render('../views/home', { myTitle: 'Home Page', data: result, moment: moment, user: req.session.user });
+            reqPlatform({
+                req: req, res: res, path: '../views/home', body: { myTitle: 'Home Page', data: result, moment: moment, user: req.session.user }
+            });
 
         })
         .catch((err) => {
             console.log('Error fetching data', err)
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(500).json({ message: "Error fetching data from database" });
-            }
-            else return res.render('../views/error', { message: "Error fetching data from database" });
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
+            });
         })
+
+
 
 }
 const getUserById = (req, res) => {
@@ -42,24 +38,23 @@ const getUserById = (req, res) => {
     userSchema.findById({ _id: id })
         .then((result) => {
 
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data fetched successfully",
-                    data: result
-                });
-            }
-            else return res.render('user/view', { myTitle: 'View User', data: result, moment: moment });
+            reqPlatform({
+                req: req, res: res, path: '../views/user/view', body: { myTitle: 'View User', data: result, moment: moment }
+            });
+
+        })
+        .catch((err) => {
+            console.log('Error fetching data', err)
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
+            });
         })
 }
 
 const addUserView = (req, res) => { // Add page
-    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-        return res.status(200).json({
-            message: "Add page",
-            user: req.session.user
-        });
-    }
-    else return res.render('user/add', { user: req.session.user });
+    reqPlatform({
+        req: req, res: res, path: '../views/user/add', body: { user: req.session.user }
+    });
 }
 const addUser = (req, res) => async (req, res) => {
     const { email, role, phone, name, gender, country, age } = req.body
@@ -82,21 +77,20 @@ const addUser = (req, res) => async (req, res) => {
 
     userSchema.create(newUser)
         .then((result) => {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data saved successfully",
-                    data: result,
-                    user: req.session.user
-                });
-            }
-            else return res.redirect('/success');
+            reqPlatform({
+                req: req, res: res, path: '../views/user/update', body: { message: "Data updated successfully", data: result, user: req.session.user }
+            });
+
+            reqPlatform({
+                req: req, res: res, path: '../views/user/update', body: { message: "Data saved successfully", data: result, user: req.session.user }
+            });
+
         })
         .catch((err) => {
             console.error('Error saving data:', err)
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(500).json({ message: "Error saving data to database" });
-            }
-            else return res.render('../views/error', { message: "Error saving data to database" });
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error saving data to database ${err}` }
+            });
         })
 }
 const updateUser = (req, res) => {
@@ -105,18 +99,13 @@ const updateUser = (req, res) => {
     userSchema.findByIdAndUpdate({ _id: id }, req.body)
         .then((result) => {
 
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data updated successfully",
-                    data: result
-                });
-            }
-            else return res.redirect('/success', { message: "Data updated successfully" });
+            reqPlatform({
+                req: req, res: res, path: '../views/success.ejs', body: { message: "Data updated successfully", data: result }
+            });
         }).catch((err) => {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(500).json({ message: "Error updating data to database" });
-            }
-            else return res.render('../views/error', { message: "Error updating data to database" });
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error updating data to database ${err}` }
+            });
         })
 }
 const deleteUser = (req, res) => {
@@ -124,29 +113,20 @@ const deleteUser = (req, res) => {
     const id = req.params.id
     userSchema.findByIdAndDelete({ _id: id })
         .then(() => {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data deleted successfully",
-                })
-            }
-            else return res.redirect('/', { message: "Data updated successfully" });
+            reqPlatform({
+                req: req, res: res, path: '../views/success.ejs', body: { message: "Data deleted successfully" }
+            });
         })
         .catch((err) => {
-            console.error('Error deleting data:', err)
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(404).json({ message: "Error deleting data from database, user not found" });
-            }
-            else return res.render('../views/error', { message: "Error deleting data from database, user not found" });
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error deleting data from database, user not found ${err}` }
+            });
         })
 }
 const searchUserView = (req, res) => {
-    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-        return res.status(200).json({
-            message: "Search page",
-            data: []
-        });
-    }
-    else return res.render('../views/user/search', { myTitle: 'Search User', moment: moment, data: [] });
+    reqPlatform({
+        req: req, res: res, path: '../views/user/search', body: { myTitle: 'Search User', moment: moment, data: [] }
+    });
 }
 const searchUser = (req, res) => {
     const value = req.body.value.toString().trim()
@@ -155,77 +135,59 @@ const searchUser = (req, res) => {
     })
         .then((result) => {
 
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data fetched successfully",
-                    data: result
-                });
-            }
-            else return res.render('../views/user/search', { myTitle: 'Search User', data: result, moment: moment });
+            reqPlatform({
+                req: req, res: res, path: '../views/user/search', body: { myTitle: 'Search User', moment: moment, data: result }
+            });
         })
         .catch((err) => {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(500).json({ message: "Error fetching data from database" });
-            }
-            else return res.render('../views/error', { message: "Error fetching data from database" });
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
+            });
         })
 }
 const editUserView = (req, res) => {
-    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-        return res.status(200).json({
-            message: "Edit page",
-            data: []
-        });
-    }
-    else return res.render('../views/user/edit', { myTitle: 'Edit User' });
+    reqPlatform({
+        req: req, res: res, path: '../views/user/edit', body: { myTitle: 'Edit User', data: [] }
+    });
 }
 const editUser = (req, res) => {
     const id = req.params.id
     userSchema.findById(id)
         .then((result) => {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data fetched successfully",
-                    data: result
-                });
-            }
-            else return res.render('../views/user/edit', { myTitle: 'Edit User', data: result, });
+            reqPlatform({
+                req: req, res: res, path: '../views/user/edit', body: { myTitle: 'Edit User', data: result }
+            });
+        })
+        .catch((err) => {
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
+            });
         })
 }
 const viewHome = (req, res) => { // View page
     userSchema.find().select('-password').lean()
         .then((result) => {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data fetched successfully",
-                    data: result
-                });
-            }
-            else return res.render('../views/home', { myTitle: 'Home Page', data: result, moment: moment });
+            reqPlatform({
+                req: req, res: res, path: '../views/home', body: { myTitle: 'Home Page', data: result, moment: moment }
+            });
         })
         .catch((err) => {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(500).json({ message: "Error fetching data from database" });
-            }
-            else return res.render('../views/error', { message: "Error fetching data from database" });
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
+            });
         })
 
 }
 const profile = (req, res) => {
     userSchema.findById({ _id: req.session.user.id })
         .then((result) => {
-
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data fetched successfully",
-                    data: result
-                });
-            }
-            else return res.render('../views/auth/my-profile', {
-                myTitle: 'Profile',
-                user: result,
-                moment: moment,
-                message: req.query.message
+            reqPlatform({
+                req: req, res: res, path: '../views/auth/my-profile', body: { myTitle: 'Profile', user: result, moment: moment, message: req.query.message }
+            });
+        })
+        .catch((err) => {
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
             });
         })
 }
@@ -233,13 +195,14 @@ const editProfileView = (req, res) => {
     userSchema.findById({ _id: req.session.user.id })
         .then((result) => {
 
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(200).json({
-                    message: "Data fetched successfully",
-                    data: result
-                });
-            }
-            else return res.render('../views/auth/edit-profile', { myTitle: 'Edit Profile', user: result, moment: moment });
+            reqPlatform({
+                req: req, res: res, path: '../views/auth/edit-profile', body: { myTitle: 'Edit Profile', user: result, moment: moment }
+            });
+        })
+        .catch((err) => {
+            reqPlatform({
+                req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
+            });
         })
 }
 
@@ -267,16 +230,8 @@ const updateProfile = async (req, res) => {
         );
 
         if (!updatedUser) {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(404).json({
-                    message: "User not found",
-                    user: req.session.user,
-                });
-            }
-            else return res.render('../views/auth/edit-profile', {
-                myTitle: 'Edit Profile',
-                user: req.session.user,
-                message: 'User not found'
+            reqPlatform({
+                req: req, res: res, path: '../views/auth/edit-profile', body: { myTitle: 'Edit Profile', user: req.session.user, message: 'User not found' }
             });
         }
 
@@ -306,32 +261,16 @@ const updateProfile = async (req, res) => {
 
     } catch (error) {
         console.error('Error updating profile:', error);
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(500).json({
-                message: "Error updating profile",
-                user: req.session.user,
-            });
-        }
-        else return res.render('../views/auth/edit-profile', {
-            myTitle: 'Edit Profile',
-            user: req.session.user,
-            message: 'Error updating profile. Please try again.'
+        reqPlatform({
+            req: req, res: res, path: '../views/auth/edit-profile', body: { myTitle: 'Edit Profile', user: req.session.user, message: 'Error updating profile. Please try again.' }
         });
     }
 }
+
 const settingsView = (req, res) => {
-    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-        return res.status(200).json({
-            message: "Settings page",
-            user: req.session.user
-        });
-    }
-    else return res.render('../views/settings', {
-        title: 'Settings',
-        user: req.session.user,
-        message: req.query.message,
-        error: req.query.error
-    })
+    reqPlatform({
+        req: req, res: res, path: '../views/settings', body: { myTitle: 'Settings', user: req.session.user, message: req.query.message, error: req.query.error }
+    });
 }
 
 
@@ -341,16 +280,16 @@ const updateProfilePicture = async (req, res) => {
         const userId = req.session.user.id;
 
         if (!req.file) {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(400).json({ success: false, message: 'No file uploaded' });
-            }
-            else return res.render('../views/settings', {
-                title: 'Settings',
-                user: req.session.user,
-                message: req.query.message,
-                error: req.query.error
+            reqPlatform({
+                req: req, res: res, path: '../views/settings', body: {
+                    title: 'Settings',
+                    user: req.session.user,
+                    message: req.query.message,
+                    error: req.query.error
+                }
             });
         }
+
 
         const updatedUser = await userSchema.findByIdAndUpdate(
             { _id: userId },
@@ -359,14 +298,13 @@ const updateProfilePicture = async (req, res) => {
         );
 
         if (!updatedUser) {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(404).json({ success: false, message: 'User not found' });
-            }
-            else return res.render('../views/settings', {
-                title: 'Settings',
-                user: req.session.user,
-                message: req.query.message,
-                error: req.query.error
+            reqPlatform({
+                req: req, res: res, path: '../views/settings', body: {
+                    title: 'Settings',
+                    user: req.session.user,
+                    message: req.query.message,
+                    error: req.query.error
+                }
             });
         }
 
@@ -375,14 +313,13 @@ const updateProfilePicture = async (req, res) => {
 
         res.json({ success: true, message: 'Profile picture updated successfully' });
     } catch (error) {
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(500).json({ success: false, message: 'Error updating profile picture' });
-        }
-        else return res.render('../views/settings', {
-            title: 'Settings',
-            user: req.session.user,
-            message: req.query.message,
-            error: req.query.error
+        reqPlatform({
+            req: req, res: res, path: '../views/settings', body: {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            }
         });
     }
 }
@@ -394,41 +331,38 @@ const changePassword = async (req, res) => {
         const { currentPassword, newPassword, confirmPassword } = req.body;
 
         if (newPassword !== confirmPassword) {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(400).json({ success: false, message: 'New passwords do not match' });
-            }
-            else return res.render('../views/settings', {
-                title: 'Settings',
-                user: req.session.user,
-                message: req.query.message,
-                error: req.query.error
+            reqPlatform({
+                req: req, res: res, path: '../views/settings', body: {
+                    title: 'Settings',
+                    user: req.session.user,
+                    message: req.query.message,
+                    error: req.query.error
+                }
             });
         }
 
         const user = await userSchema.findById(userId);
         if (!user) {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(404).json({ success: false, message: 'User not found' });
-            }
-            else return res.render('../views/settings', {
-                title: 'Settings',
-                user: req.session.user,
-                message: req.query.message,
-                error: req.query.error
+            reqPlatform({
+                req: req, res: res, path: '../views/settings', body: {
+                    title: 'Settings',
+                    user: req.session.user,
+                    message: req.query.message,
+                    error: req.query.error
+                }
             });
         }
 
         // Verify current password
         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
         if (!isCurrentPasswordValid) {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(400).json({ success: false, message: 'Current password is incorrect' });
-            }
-            else return res.render('../views/settings', {
-                title: 'Settings',
-                user: req.session.user,
-                message: req.query.message,
-                error: req.query.error
+            reqPlatform({
+                req: req, res: res, path: '../views/settings', body: {
+                    title: 'Settings',
+                    user: req.session.user,
+                    message: req.query.message,
+                    error: req.query.error
+                }
             });
         }
 
@@ -442,24 +376,22 @@ const changePassword = async (req, res) => {
             { password: hashedNewPassword }
         );
 
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(200).json({ success: true, message: 'Password changed successfully' });
-        }
-        else return res.render('../views/settings', {
-            title: 'Settings',
-            user: req.session.user,
-            message: req.query.message,
-            error: req.query.error
+        reqPlatform({
+            req: req, res: res, path: '../views/settings', body: {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            }
         });
     } catch (error) {
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(500).json({ success: false, message: 'Error changing password' });
-        }
-        else return res.render('../views/settings', {
-            title: 'Settings',
-            user: req.session.user,
-            message: req.query.message,
-            error: req.query.error
+        reqPlatform({
+            req: req, res: res, path: '../views/settings', body: {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            }
         });
     }
 }
@@ -471,14 +403,13 @@ const deleteAccount = async (req, res) => {
 
         const deletedUser = await userSchema.findByIdAndDelete(userId);
         if (!deletedUser) {
-            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-                return res.status(404).json({ success: false, message: 'User not found' });
-            }
-            else return res.render('../views/settings', {
-                title: 'Settings',
-                user: req.session.user,
-                message: req.query.message,
-                error: req.query.error
+            reqPlatform({
+                req: req, res: res, path: '../views/settings', body: {
+                    title: 'Settings',
+                    user: req.session.user,
+                    message: req.query.message,
+                    error: req.query.error
+                }
             });
         }
 
@@ -489,27 +420,27 @@ const deleteAccount = async (req, res) => {
             }
         });
 
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(200).json({ success: true, message: 'Account deleted successfully' });
-        }
-        else return res.render('../views/settings', {
-            title: 'Settings',
-            user: req.session.user,
-            message: req.query.message,
-            error: req.query.error
+        reqPlatform({
+            req: req, res: res, path: '../views/settings', body: {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            }
         });
+
     } catch (error) {
         console.error('Error deleting account:', error);
-        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
-            return res.status(500).json({ success: false, message: 'Error deleting account' });
-        }
-        else return res.render('../views/error.ejs', {
-            title: 'Error',
-            message: 'Error deleting account'
+        reqPlatform({
+            req: req, res: res, path: '../views/error', body: {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            }
         });
     }
 }
-
 // Export user data
 const exportData = async (req, res) => {
     try {
