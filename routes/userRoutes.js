@@ -16,6 +16,7 @@ router.get("/profile", userController.profile);
 router.get("/profile/edit", userController.editProfileView);
 router.get("/settings", userController.settingsView);
 router.get("/settings/export-data", userController.exportData);
+router.get("/search", userController.searchUserView);
 
 //POST routes
 router.post("/profile/edit", upload.single('profilePicture'), userController.updateProfile);

@@ -16,15 +16,17 @@ router.get('/success', (req, res, next) => { // middleware route
     //next get/success route will not be called or the success page will not be rendered
 })
 router.get('/success', (req, res) => { // Success page
-    res.render('success', { title: 'Success' })
-    // res.status(200).json({
-    //     message: "Success page",
-    // })
+    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman')
+        return res.status(200).json({
+            message: "Success page",
+        })
+
+    else return res.render('success', { title: 'Success' })
+
 })
 router.get('/error', (req, res) => { // Success page
-    res.render('error', { title: 'Error', message: req.query.message })
-    // res.status(200).json({
-    //     message: "Success page",
-    // })
+    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman')
+        return res.status(200).json({ title: 'Error', message: req.query.message })
+    else return res.render('error', { title: 'Error', message: req.query.message })
 })
 module.exports = router

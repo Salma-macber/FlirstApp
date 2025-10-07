@@ -8,7 +8,10 @@ const authMiddleware = async (req, res, next) => {
     console.log('user ', req.session.user)
 
     if (!req.session.accessToken) {
-        return res.render('../views/auth/login')
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        else return res.render('../views/auth/login')
     }
 
     jwt.verify(req.session.accessToken, process.env.AccessTokenSecret, async (err, user) => {
@@ -16,18 +19,27 @@ const authMiddleware = async (req, res, next) => {
             // Access token is invalid, try to refresh using refresh token
             const refreshToken = req.cookies.refreshToken;
             if (!refreshToken) {
-                return res.render('../views/auth/login')
+                if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                    return res.status(401).json({ message: "Unauthorized" });
+                }
+                else return res.render('../views/auth/login')
             }
 
             jwt.verify(refreshToken, process.env.RefreshToken, async (err, decoded) => {
                 console.log('decoded ', decoded)
                 if (err) {
-                    return res.render('../views/auth/login')
+                    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                        return res.status(401).json({ message: "Unauthorized" });
+                    }
+                    else return res.render('../views/auth/login')
                 }
 
                 const user = await User.findById(decoded.id).exec();
                 if (!user) {
-                    return res.status(401).json({ message: "المستخدم غير موجود" });
+                    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                        return res.status(401).json({ message: "المستخدم غير موجود" });
+                    }
+                    else return res.render('../views/auth/login')
                 }
 
                 const accessToken = authController.getAccessToken(user);

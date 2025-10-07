@@ -6,24 +6,33 @@ const slugify = require('slugify')
 const getAllData = (req, res) => {
 
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) res.render('../views/auth/login');
+    if (!refreshToken) {
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+        else return res.render('../views/auth/login');
+    }
     // If you need to send the token as a header to the client, you can set it in the response headers.
     // For example, if you have a token (e.g., refreshToken), you can do:
 
     userSchema.find().select('-password').lean()
         .then((result) => {
-            console.log(result)
-            // res.status(200).json({
-            //     message: "Data fetched successfully",
-            //     data: result
-            // })
-            res.render('../views/home', { myTitle: 'Home Page', data: result, moment: moment, user: req.session.user })
 
-            // res.render('home', { myTitle: 'Home Page', data: result, moment: moment }) // Render the home page
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data fetched successfully",
+                    data: result
+                });
+            }
+            else return res.render('../views/home', { myTitle: 'Home Page', data: result, moment: moment, user: req.session.user });
+
         })
         .catch((err) => {
             console.log('Error fetching data', err)
-            res.status(500).send('Error fetching data from database')
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(500).json({ message: "Error fetching data from database" });
+            }
+            else return res.render('../views/error', { message: "Error fetching data from database" });
         })
 
 }
@@ -32,18 +41,25 @@ const getUserById = (req, res) => {
 
     userSchema.findById({ _id: id })
         .then((result) => {
-            // res.status(200).json({
-            //     message: "Data fetched successfully",
-            //     data: result
-            // })
-            res.render('user/view', { myTitle: 'View User', data: result, moment: moment })
+
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data fetched successfully",
+                    data: result
+                });
+            }
+            else return res.render('user/view', { myTitle: 'View User', data: result, moment: moment });
         })
 }
 
 const addUserView = (req, res) => { // Add page
-    console.log('Add page')
-    console.log('req.user ', req.user)
-    res.render('user/add', { user: req.session.user })
+    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+        return res.status(200).json({
+            message: "Add page",
+            user: req.session.user
+        });
+    }
+    else return res.render('user/add', { user: req.session.user });
 }
 const addUser = (req, res) => async (req, res) => {
     const { email, role, phone, name, gender, country, age } = req.body
@@ -66,17 +82,21 @@ const addUser = (req, res) => async (req, res) => {
 
     userSchema.create(newUser)
         .then((result) => {
-            console.log('Data saved successfully')
-            res.status(200).json({
-                message: "Data saved successfully",
-                data: result,
-                user: req.session.user
-            })
-            // res.redirect('/success') // Redirect back to home page after successful save
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data saved successfully",
+                    data: result,
+                    user: req.session.user
+                });
+            }
+            else return res.redirect('/success');
         })
         .catch((err) => {
             console.error('Error saving data:', err)
-            res.status(500).send('Error saving data to database')
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(500).json({ message: "Error saving data to database" });
+            }
+            else return res.render('../views/error', { message: "Error saving data to database" });
         })
 }
 const updateUser = (req, res) => {
@@ -84,110 +104,142 @@ const updateUser = (req, res) => {
 
     userSchema.findByIdAndUpdate({ _id: id }, req.body)
         .then((result) => {
-            console.log('Data updated successfully')
-            res.status(200).json({
-                message: "Data updated successfully",
-                oldData: result
-            })
 
-            // res.redirect('/success') // Redirect back to home page after successful update
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data updated successfully",
+                    data: result
+                });
+            }
+            else return res.redirect('/success', { message: "Data updated successfully" });
         }).catch((err) => {
-            console.error('Error updating data:', err.message)
-            // res.status(500).send('Error updating data to database', err.message)
-            res.redirect('/error', { message: err.message })
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(500).json({ message: "Error updating data to database" });
+            }
+            else return res.render('../views/error', { message: "Error updating data to database" });
         })
 }
 const deleteUser = (req, res) => {
-    console.log('Data deleted successfully')
 
     const id = req.params.id
     userSchema.findByIdAndDelete({ _id: id })
         .then(() => {
-            console.log('Data deleted successfully')
-            res.status(200).json({
-                message: "Data deleted successfully",
-            })
-            // res.redirect('/') // Redirect back to home page after successful save
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data deleted successfully",
+                })
+            }
+            else return res.redirect('/', { message: "Data updated successfully" });
         })
         .catch((err) => {
             console.error('Error deleting data:', err)
-            res.status(404).send('Error deleting data from database, user not found')
-            // res.status(500).send('Error deleting data from database')
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(404).json({ message: "Error deleting data from database, user not found" });
+            }
+            else return res.render('../views/error', { message: "Error deleting data from database, user not found" });
         })
-    // res.render('user/delete', { myTitle: 'Delete User' })
-    // res.redirect('/success') // Redirect back to home page after successful save
+}
+const searchUserView = (req, res) => {
+    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+        return res.status(200).json({
+            message: "Search page",
+            data: []
+        });
+    }
+    else return res.render('../views/user/search', { myTitle: 'Search User', moment: moment, data: [] });
 }
 const searchUser = (req, res) => {
-    const value = req.body.value.trim()
+    const value = req.body.value.toString().trim()
     userSchema.find({
-        // userAge: value
-        // userAge: {$gt: value }
-        $or: [{ name: value }, { email: value }]
+        $or: [{ name: value }, { email: value }, { age: { $gt: value } }]
     })
         .then((result) => {
-            console.log('Data fetched successfully', result)
-            // res.render('user/search', { myTitle: 'Search User', data: result, moment: moment })
-            res.status(200).json({
-                message: "Data fetched successfully",
-                data: result
-            })
+
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data fetched successfully",
+                    data: result
+                });
+            }
+            else return res.render('../views/user/search', { myTitle: 'Search User', data: result, moment: moment });
         })
         .catch((err) => {
-            console.log('Error fetching data', err)
-            res.status(500).send('Error fetching data from database')
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(500).json({ message: "Error fetching data from database" });
+            }
+            else return res.render('../views/error', { message: "Error fetching data from database" });
         })
 }
 const editUserView = (req, res) => {
-    res.render('user/edit', { myTitle: 'Edit User' })
+    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+        return res.status(200).json({
+            message: "Edit page",
+            data: []
+        });
+    }
+    else return res.render('../views/user/edit', { myTitle: 'Edit User' });
 }
 const editUser = (req, res) => {
     const id = req.params.id
     userSchema.findById(id)
         .then((result) => {
-            res.render('user/edit', { myTitle: 'Edit User', data: result, })
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data fetched successfully",
+                    data: result
+                });
+            }
+            else return res.render('../views/user/edit', { myTitle: 'Edit User', data: result, });
         })
 }
 const viewHome = (req, res) => { // View page
-    console.log('View page')
     userSchema.find().select('-password').lean()
         .then((result) => {
-            console.log(result)
-            res.status(200).json({
-                message: "Data fetched successfully",
-                data: result
-            })
-            // res.render('home', { myTitle: 'Home Page', data: result, moment: moment }) // Render the home page
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data fetched successfully",
+                    data: result
+                });
+            }
+            else return res.render('../views/home', { myTitle: 'Home Page', data: result, moment: moment });
         })
         .catch((err) => {
-            console.log('Error fetching data', err)
-            res.status(500).send('Error fetching data from database')
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(500).json({ message: "Error fetching data from database" });
+            }
+            else return res.render('../views/error', { message: "Error fetching data from database" });
         })
 
-    // res.render('user/view', { myTitle: 'View User' })
 }
 const profile = (req, res) => {
     userSchema.findById({ _id: req.session.user.id })
         .then((result) => {
-            // res.status(200).json({
-            //     message: "Data fetched successfully",
-            //     data: result
-            // })
-            res.render('../views/auth/my-profile', {
+
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data fetched successfully",
+                    data: result
+                });
+            }
+            else return res.render('../views/auth/my-profile', {
                 myTitle: 'Profile',
                 user: result,
                 moment: moment,
                 message: req.query.message
-            })
+            });
         })
 }
 const editProfileView = (req, res) => {
     userSchema.findById({ _id: req.session.user.id })
         .then((result) => {
-            // res.status(200).json({
-            //     message: "Data fetched successfully",
-            //     data: result
-            // })
-            res.render('../views/auth/edit-profile', { myTitle: 'Edit Profile', user: result, moment: moment })
+
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(200).json({
+                    message: "Data fetched successfully",
+                    data: result
+                });
+            }
+            else return res.render('../views/auth/edit-profile', { myTitle: 'Edit Profile', user: result, moment: moment });
         })
 }
 
@@ -215,7 +267,13 @@ const updateProfile = async (req, res) => {
         );
 
         if (!updatedUser) {
-            return res.render('../views/auth/edit-profile', {
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(404).json({
+                    message: "User not found",
+                    user: req.session.user,
+                });
+            }
+            else return res.render('../views/auth/edit-profile', {
                 myTitle: 'Edit Profile',
                 user: req.session.user,
                 message: 'User not found'
@@ -238,11 +296,23 @@ const updateProfile = async (req, res) => {
             createdAt: updatedUser.createdAt
         };
 
-        res.redirect('/user/profile?message=Profile updated successfully! ✅');
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(200).json({
+                message: "Profile updated successfully",
+                user: req.session.user,
+            });
+        }
+        else return res.redirect('/user/profile?message=Profile updated successfully! ✅');
 
     } catch (error) {
         console.error('Error updating profile:', error);
-        res.render('../views/auth/edit-profile', {
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(500).json({
+                message: "Error updating profile",
+                user: req.session.user,
+            });
+        }
+        else return res.render('../views/auth/edit-profile', {
             myTitle: 'Edit Profile',
             user: req.session.user,
             message: 'Error updating profile. Please try again.'
@@ -250,7 +320,13 @@ const updateProfile = async (req, res) => {
     }
 }
 const settingsView = (req, res) => {
-    res.render('../views/settings', {
+    if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+        return res.status(200).json({
+            message: "Settings page",
+            user: req.session.user
+        });
+    }
+    else return res.render('../views/settings', {
         title: 'Settings',
         user: req.session.user,
         message: req.query.message,
@@ -265,7 +341,15 @@ const updateProfilePicture = async (req, res) => {
         const userId = req.session.user.id;
 
         if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No file uploaded' });
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(400).json({ success: false, message: 'No file uploaded' });
+            }
+            else return res.render('../views/settings', {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            });
         }
 
         const updatedUser = await userSchema.findByIdAndUpdate(
@@ -275,7 +359,15 @@ const updateProfilePicture = async (req, res) => {
         );
 
         if (!updatedUser) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(404).json({ success: false, message: 'User not found' });
+            }
+            else return res.render('../views/settings', {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            });
         }
 
         // Update session
@@ -283,8 +375,15 @@ const updateProfilePicture = async (req, res) => {
 
         res.json({ success: true, message: 'Profile picture updated successfully' });
     } catch (error) {
-        console.error('Error updating profile picture:', error);
-        res.status(500).json({ success: false, message: 'Error updating profile picture' });
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(500).json({ success: false, message: 'Error updating profile picture' });
+        }
+        else return res.render('../views/settings', {
+            title: 'Settings',
+            user: req.session.user,
+            message: req.query.message,
+            error: req.query.error
+        });
     }
 }
 
@@ -295,18 +394,42 @@ const changePassword = async (req, res) => {
         const { currentPassword, newPassword, confirmPassword } = req.body;
 
         if (newPassword !== confirmPassword) {
-            return res.status(400).json({ success: false, message: 'New passwords do not match' });
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(400).json({ success: false, message: 'New passwords do not match' });
+            }
+            else return res.render('../views/settings', {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            });
         }
 
         const user = await userSchema.findById(userId);
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(404).json({ success: false, message: 'User not found' });
+            }
+            else return res.render('../views/settings', {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            });
         }
 
         // Verify current password
         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
         if (!isCurrentPasswordValid) {
-            return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+            }
+            else return res.render('../views/settings', {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            });
         }
 
         // Hash new password
@@ -319,10 +442,25 @@ const changePassword = async (req, res) => {
             { password: hashedNewPassword }
         );
 
-        res.json({ success: true, message: 'Password changed successfully' });
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(200).json({ success: true, message: 'Password changed successfully' });
+        }
+        else return res.render('../views/settings', {
+            title: 'Settings',
+            user: req.session.user,
+            message: req.query.message,
+            error: req.query.error
+        });
     } catch (error) {
-        console.error('Error changing password:', error);
-        res.status(500).json({ success: false, message: 'Error changing password' });
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(500).json({ success: false, message: 'Error changing password' });
+        }
+        else return res.render('../views/settings', {
+            title: 'Settings',
+            user: req.session.user,
+            message: req.query.message,
+            error: req.query.error
+        });
     }
 }
 
@@ -333,7 +471,15 @@ const deleteAccount = async (req, res) => {
 
         const deletedUser = await userSchema.findByIdAndDelete(userId);
         if (!deletedUser) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(404).json({ success: false, message: 'User not found' });
+            }
+            else return res.render('../views/settings', {
+                title: 'Settings',
+                user: req.session.user,
+                message: req.query.message,
+                error: req.query.error
+            });
         }
 
         // Destroy session
@@ -343,10 +489,24 @@ const deleteAccount = async (req, res) => {
             }
         });
 
-        res.json({ success: true, message: 'Account deleted successfully' });
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(200).json({ success: true, message: 'Account deleted successfully' });
+        }
+        else return res.render('../views/settings', {
+            title: 'Settings',
+            user: req.session.user,
+            message: req.query.message,
+            error: req.query.error
+        });
     } catch (error) {
         console.error('Error deleting account:', error);
-        res.status(500).json({ success: false, message: 'Error deleting account' });
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(500).json({ success: false, message: 'Error deleting account' });
+        }
+        else return res.render('../views/error.ejs', {
+            title: 'Error',
+            message: 'Error deleting account'
+        });
     }
 }
 
@@ -357,7 +517,13 @@ const exportData = async (req, res) => {
         const user = await userSchema.findById(userId).select('-password');
 
         if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
+            if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+                return res.status(404).json({ success: false, message: 'exportData not found' });
+            }
+            else return res.render('../views/error.ejs', {
+                title: 'Error',
+                message: 'exportData not found'
+            });
         }
 
         const exportData = {
@@ -384,12 +550,18 @@ const exportData = async (req, res) => {
         res.json(exportData);
     } catch (error) {
         console.error('Error exporting data:', error);
-        res.status(500).json({ success: false, message: 'Error exporting data' });
+        if (req.headers['clienttype' || 'clientType'] === 'mobile' || req.headers['clienttype' || 'clientType'] === 'postman') {
+            return res.status(500).json({ success: false, message: 'Error exporting data' });
+        }
+        else return res.render('../views/error.ejs', {
+            title: 'Error',
+            message: 'Error exporting data'
+        });
     }
 }
 
 module.exports = {
     profile, viewHome, getAllData, addUser, deleteUser, editUser, getUserById, addUserView, updateUser,
     searchUser, editUserView, profile, editProfileView, updateProfile, settingsView,
-    updateProfilePicture, changePassword, deleteAccount, exportData
+    updateProfilePicture, changePassword, deleteAccount, exportData, searchUserView
 }
