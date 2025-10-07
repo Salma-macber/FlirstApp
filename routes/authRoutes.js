@@ -11,7 +11,15 @@ router.get("/login", authController.openLoginForm);
 router.post("/login", authController.login);
 router.get("/google", passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get("/google/callback",
-    passport.authenticate("google", {  scope: ['profile', 'email'],failureRedirect: "/" }),
+    passport.authenticate("google", { scope: ['profile', 'email'], failureRedirect: "/" }),
+    (req, res) => {
+        console.log(req.user);
+        res.send(`<h2>Welcome ${req.user.displayName} 🎉</h2>`);
+    }
+);
+router.get("/facebook", passport.authenticate('facebook', { scope: ['public_profile',] }));
+router.get("/facebook/callback",
+    passport.authenticate("facebook", { scope: ['public_profile'], failureRedirect: "/" }),
     (req, res) => {
         console.log(req.user);
         res.send(`<h2>Welcome ${req.user.displayName} 🎉</h2>`);

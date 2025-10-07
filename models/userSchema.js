@@ -30,12 +30,23 @@ const userSchema = new mongoose.Schema({
     },
     phone: String,
     profilePicture: String,
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true, // allows multiple null values
+    },
+    facebookId: {
+        type: String,
+        unique: true,
+        sparse: true, // allows multiple null values
+    },
     password: {
         type: String,
-        required: [true, 'password is required'],
+        required: function () {
+            return !this.googleId && !this.facebookId; // password required only if not OAuth user
+        },
         minlength: [8, 'password must be at least 8 characters long'],
         trim: true,
-
     },
     role: {
         type: String,
