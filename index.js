@@ -6,7 +6,7 @@ const mongoose = require('mongoose') // for connecting to the database
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
-
+const passport = require('./config/passport')
 // app.use(mongoose)
 const connectDB = require('./controllers/dbController') // for connecting to the database
 // import express from 'express'
@@ -15,7 +15,7 @@ app.use(flash());
 app.use(session({
     secret: process.env.SECRET_KEY,   // change to env var
     resave: false,  // don't save session if unmodified
-    saveUninitialized: false,  // don't create session until something stored
+    saveUninitialized: true,  // don't create session until something stored
     store: MongoStore.create({
         mongoUrl: process.env.DATABASE_URL,
         touchAfter: 24 * 3600, // lazy session update (24 hours)
@@ -26,6 +26,9 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24 * 7  // 7 days (in ms)
     }
 }));
+app.use(passport.initialize());
+app.use(passport.session());
+
 const port = process.env.MAIN_PORT || 3000
 const port2 = process.env.SOCKET_PORT || 3000
 
