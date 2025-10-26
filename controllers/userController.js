@@ -8,6 +8,7 @@ const getAllData = (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
         reqPlatform({
+            status: 405,
             req: req, res: res, path: '../views/auth/login', body: { message: "Unauthorized" }
         });
     }
@@ -25,6 +26,7 @@ const getAllData = (req, res) => {
         .catch((err) => {
             console.log('Error fetching data', err)
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
             });
         })
@@ -46,6 +48,7 @@ const getUserById = (req, res) => {
         .catch((err) => {
             console.log('Error fetching data', err)
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
             });
         })
@@ -89,6 +92,7 @@ const addUser = (req, res) => async (req, res) => {
         .catch((err) => {
             console.error('Error saving data:', err)
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error saving data to database ${err}` }
             });
         })
@@ -104,6 +108,7 @@ const updateUser = (req, res) => {
             });
         }).catch((err) => {
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error updating data to database ${err}` }
             });
         })
@@ -119,6 +124,7 @@ const deleteUser = (req, res) => {
         })
         .catch((err) => {
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error deleting data from database, user not found ${err}` }
             });
         })
@@ -141,6 +147,7 @@ const searchUser = (req, res) => {
         })
         .catch((err) => {
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
             });
         })
@@ -160,6 +167,7 @@ const editUser = (req, res) => {
         })
         .catch((err) => {
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
             });
         })
@@ -173,6 +181,7 @@ const viewHome = (req, res) => { // View page
         })
         .catch((err) => {
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
             });
         })
@@ -187,6 +196,7 @@ const profile = (req, res) => {
         })
         .catch((err) => {
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
             });
         })
@@ -201,6 +211,7 @@ const editProfileView = (req, res) => {
         })
         .catch((err) => {
             reqPlatform({
+                status: 400,
                 req: req, res: res, path: '../views/error', body: { message: `Error fetching data from database ${err}` }
             });
         })
@@ -231,6 +242,7 @@ const updateProfile = async (req, res) => {
 
         if (!updatedUser) {
             reqPlatform({
+                status: 404,
                 req: req, res: res, path: '../views/auth/edit-profile', body: { myTitle: 'Edit Profile', user: req.session.user, message: 'User not found' }
             });
         }
@@ -262,6 +274,7 @@ const updateProfile = async (req, res) => {
     } catch (error) {
         console.error('Error updating profile:', error);
         reqPlatform({
+            status: 400,
             req: req, res: res, path: '../views/auth/edit-profile', body: { myTitle: 'Edit Profile', user: req.session.user, message: 'Error updating profile. Please try again.' }
         });
     }
@@ -314,6 +327,7 @@ const updateProfilePicture = async (req, res) => {
         res.json({ success: true, message: 'Profile picture updated successfully' });
     } catch (error) {
         reqPlatform({
+            status: 400,
             req: req, res: res, path: '../views/settings', body: {
                 title: 'Settings',
                 user: req.session.user,
@@ -344,6 +358,7 @@ const changePassword = async (req, res) => {
         const user = await userSchema.findById(userId);
         if (!user) {
             reqPlatform({
+                status: 404,
                 req: req, res: res, path: '../views/settings', body: {
                     title: 'Settings',
                     user: req.session.user,
@@ -386,6 +401,7 @@ const changePassword = async (req, res) => {
         });
     } catch (error) {
         reqPlatform({
+            status: 400,
             req: req, res: res, path: '../views/settings', body: {
                 title: 'Settings',
                 user: req.session.user,
@@ -432,6 +448,7 @@ const deleteAccount = async (req, res) => {
     } catch (error) {
         console.error('Error deleting account:', error);
         reqPlatform({
+            status: 400,
             req: req, res: res, path: '../views/error', body: {
                 title: 'Settings',
                 user: req.session.user,

@@ -166,6 +166,12 @@ const userRoutes = require('./routes/userRoutes') // for the user routes
 app.use('/user', userRoutes) // if you want to use the routes in the user initial file
 //End Routes
 
+app.use((err, req, res, nxt) => {
+    for (let e in err.errors) {
+        res.sen
+    }
+
+});
 mongoose.connection.once('open', (err) => {
     console.log('Connecting to mongoose server')
     // start the mongoose server 
